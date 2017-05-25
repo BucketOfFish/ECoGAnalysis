@@ -10,7 +10,7 @@ X_data = data['Xhigh gamma'][:]
 y_data = data['y'][:] # phoneme label
 
 # preprocessing
-X_data = np.divide(X_data, np.amax(X_data)) # normalize EEG signal
+X_data = np.divide(X_data, np.amax(X_data)) # normalize ECoG signal
 
 # sort by phonemes
 sort_order = y_data.argsort() # sort by phonemes
@@ -23,15 +23,15 @@ def plotEvent(eventN):
     y = y_data[eventN]
 
     plt.imshow(X, cmap=cm.gist_rainbow, vmin=0, vmax=1)
-    plt.title("Event " + str(eventN) + " - EEG signal during production of phoneme " + str(y))
+    plt.title("Event " + str(eventN) + " - ECoG signal during production of phoneme " + str(y))
     plt.xlabel("Time step")
     plt.ylabel("ECOG channel")
     directory = "Plots/Phoneme" + str(y) + "/"
     if not os.path.exists(directory): os.makedirs(directory)
     plt.savefig(directory + "Event" + str(eventN) + ".pdf", bbox_inches="tight")
 
-for eventN in range(len(y_data)):
-    plotEvent(eventN)
+#for eventN in range(len(y_data)):
+    #plotEvent(eventN)
 
 # plot averages for each phoneme
 for phoneme in range(max(y_data)):
@@ -39,7 +39,7 @@ for phoneme in range(max(y_data)):
     X = np.mean(X_data[indices], axis=0)
 
     plt.imshow(X, cmap=cm.gist_rainbow, vmin=0, vmax=1)
-    plt.title("Average EEG signal during production of phoneme " + str(phoneme))
+    plt.title("Average ECoG signal during production of phoneme " + str(phoneme))
     plt.xlabel("Time step")
     plt.ylabel("ECoG channel")
     directory = "Plots/Averages/"
