@@ -5,9 +5,9 @@ import numpy as np
 def main(_):
 
     # settings
-    batchSize = 50
     samples = 2572
     trainingSize = 1800
+    batchSize = 1800
     nClasses = 57
     channels = 86 # ECoG channels
     timeSteps = 258 # time steps per sample
