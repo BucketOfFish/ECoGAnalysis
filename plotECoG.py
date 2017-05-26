@@ -17,6 +17,10 @@ sort_order = y_data.argsort() # sort by phonemes
 X_data = X_data[sort_order]
 y_data = y_data[sort_order]
 
+# take only best channels
+bestChannels = [34, 27, 37, 36, 25, 38, 42, 33, 24, 23] # ordered worst to best
+X_data = X_data[:,bestChannels,:]
+
 # plot individual events
 def plotEvent(eventN):
     X = X_data[eventN]
@@ -26,22 +30,22 @@ def plotEvent(eventN):
     plt.title("Event " + str(eventN) + " - ECoG signal during production of phoneme " + str(y))
     plt.xlabel("Time step")
     plt.ylabel("ECOG channel")
-    directory = "Plots/Phoneme" + str(y) + "/"
+    directory = "Plots/BestChannels/Phoneme" + str(y) + "/"
     if not os.path.exists(directory): os.makedirs(directory)
     plt.savefig(directory + "Event" + str(eventN) + ".pdf", bbox_inches="tight")
 
-#for eventN in range(len(y_data)):
-    #plotEvent(eventN)
+for eventN in range(len(y_data)):
+    plotEvent(eventN)
 
-# plot averages for each phoneme
-for phoneme in range(max(y_data)):
-    indices = [y_data == phoneme]
-    X = np.mean(X_data[indices], axis=0)
+# # plot averages for each phoneme
+# for phoneme in range(max(y_data)):
+    # indices = [y_data == phoneme]
+    # X = np.mean(X_data[indices], axis=0)
 
-    plt.imshow(X, cmap=cm.gist_rainbow, vmin=0, vmax=1)
-    plt.title("Average ECoG signal during production of phoneme " + str(phoneme))
-    plt.xlabel("Time step")
-    plt.ylabel("ECoG channel")
-    directory = "Plots/Averages/"
-    if not os.path.exists(directory): os.makedirs(directory)
-    plt.savefig(directory + "Phoneme" + str(phoneme) + ".pdf", bbox_inches="tight")
+    # plt.imshow(X, cmap=cm.gist_rainbow, vmin=0, vmax=1)
+    # plt.title("Average ECoG signal during production of phoneme " + str(phoneme))
+    # plt.xlabel("Time step")
+    # plt.ylabel("ECoG channel")
+    # directory = "Plots/BestChannels/Averages/"
+    # if not os.path.exists(directory): os.makedirs(directory)
+    # plt.savefig(directory + "Phoneme" + str(phoneme) + ".pdf", bbox_inches="tight")

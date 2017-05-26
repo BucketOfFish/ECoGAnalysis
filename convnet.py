@@ -12,6 +12,10 @@ def main(_):
     channels = 86 # ECoG channels
     timeSteps = 258 # time steps per sample
 
+    # use only best channels
+    channels = 10
+    bestChannels = [34, 27, 37, 36, 25, 38, 42, 33, 24, 23] # ordered worst to best
+
     #########
     # SETUP #
     #########
@@ -21,10 +25,14 @@ def main(_):
     x_data = data['Xhigh gamma'][:]
     y_predata = data['y'][:]
 
+    # taking only best channels
+    x_data = x_data[:,bestChannels,:]
+
     # shaping data and changing to one hot format
     x_data = x_data[..., np.newaxis] # add that fourth dimension 
     y_data = np.zeros((samples, nClasses))
     y_data[np.arange(samples), y_predata] = 1
+    del y_predata
 
     # split test and train
     # CHECKPOINT - do this smarter, and use TensorFlow's batching functions
@@ -58,18 +66,18 @@ def main(_):
     y_truth = tf.placeholder(tf.float32, shape=[None, nClasses])
 
     # conv layer 1
-    W_conv1 = weight_variable([5, 70, 1, 32]) # compute 32 features for each patch
+    W_conv1 = weight_variable([2, 70, 1, 32]) # compute 32 features for each patch
     b_conv1 = bias_variable([32])
-    h_conv1 = tf.nn.relu(conv2d(x, W_conv1, stride=3) + b_conv1)
+    h_conv1 = tf.nn.relu(conv2d(x, W_conv1, stride=1) + b_conv1)
     h_pool1 = max_pool(h_conv1, size=2)
     print h_conv1.shape
     print h_pool1.shape
 
     # conv layer 2
-    W_conv2 = weight_variable([5, 5, 32, 64]) # compute 64 features for each 5x5 patch
+    W_conv2 = weight_variable([2, 5, 32, 64]) # compute 64 features for each 5x5 patch
     b_conv2 = bias_variable([64])
-    h_conv2 = tf.nn.relu(conv2d(h_pool1, W_conv2, stride=2) + b_conv2)
-    h_pool2 = max_pool(h_conv2, size=3)
+    h_conv2 = tf.nn.relu(conv2d(h_pool1, W_conv2, stride=1) + b_conv2)
+    h_pool2 = max_pool(h_conv2, size=2)
     print h_conv2.shape
     print h_pool2.shape
 

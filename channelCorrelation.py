@@ -25,40 +25,40 @@ for phoneme in range(max(y_data)):
 
 # plot average of averages
 X_totalAverage = np.mean(X_averages, axis=0)
-plt.imshow(X_totalAverage, cmap=cm.gist_rainbow, vmin=0, vmax=1)
-plt.title("Average ECoG signal over all events")
-plt.xlabel("Time step")
-plt.ylabel("ECOG channel")
-directory = "Plots/Channels/"
-if not os.path.exists(directory): os.makedirs(directory)
-plt.savefig(directory + "All.pdf", bbox_inches="tight")
+# plt.imshow(X_totalAverage, cmap=cm.gist_rainbow, vmin=0, vmax=1)
+# plt.title("Average ECoG signal over all events")
+# plt.xlabel("Time step")
+# plt.ylabel("ECOG channel")
+# directory = "Plots/Channels/"
+# if not os.path.exists(directory): os.makedirs(directory)
+# plt.savefig(directory + "All.pdf", bbox_inches="tight")
 
-# plot differences between phoneme averages and total average
-for phoneme in range(max(y_data)):
-    plt.imshow(X_average - X_totalAverage, cmap=cm.gist_rainbow, vmin=-0.2, vmax=0.2)
-    plt.title("Average difference in ECoG signal during production of phoneme " + str(phoneme))
-    plt.xlabel("Time step")
-    plt.ylabel("ECoG channel")
-    directory = "Plots/Channels/"
-    if not os.path.exists(directory): os.makedirs(directory)
-    plt.savefig(directory + "Phoneme" + str(phoneme) + ".pdf", bbox_inches="tight")
+# # plot differences between phoneme averages and total average
+# for phoneme in range(max(y_data)):
+    # plt.imshow(X_averages[phoneme] - X_totalAverage, cmap=cm.gist_rainbow, vmin=-0.2, vmax=0.2)
+    # plt.title("Average difference in ECoG signal during production of phoneme " + str(phoneme))
+    # plt.xlabel("Time step")
+    # plt.ylabel("ECoG channel")
+    # directory = "Plots/Channels/"
+    # if not os.path.exists(directory): os.makedirs(directory)
+    # plt.savefig(directory + "Phoneme" + str(phoneme) + ".pdf", bbox_inches="tight")
 
-# find most significant channel differences
-averageChannelSum = np.sum(X_totalAverage, axis=1)
-channelSums = []
-for phoneme in range(max(y_data)):
-    if (len(channelSums) == 0):
-        channelSums = np.sum(X_averages[phoneme], axis=1)
-    else:
-        channelSums = np.vstack((channelSums, (np.sum(np.absolute(X_averages[phoneme]), axis=1)))) # total absolute difference per channel
-channelSums = np.transpose(channelSums)
-channelSums = channelSums - np.amin(channelSums)
-channelSums = np.divide(channelSums, np.amax(channelSums)) # normalizing
-tempSums = np.sum(channelSums, axis=1)
-bestN = 10 # find 10 best channels
-bestChannels = np.argpartition(tempSums, -bestN)[-bestN:]
-bestChannels = bestChannels[np.argsort(tempSums[bestChannels])]
-print bestChannels
+# # find most significant channel differences
+# averageChannelSum = np.sum(X_totalAverage, axis=1)
+# channelSums = []
+# for phoneme in range(max(y_data)):
+    # if (len(channelSums) == 0):
+        # channelSums = np.sum(np.absolute(X_averages[phoneme] - X_totalAverage), axis=1)
+    # else:
+        # channelSums = np.vstack((channelSums, (np.sum(np.absolute(X_averages[phoneme] - X_totalAverage), axis=1)))) # total absolute difference per channel
+# channelSums = np.transpose(channelSums)
+# channelSums = channelSums - np.amin(channelSums)
+# channelSums = np.divide(channelSums, np.amax(channelSums)) # normalizing
+# tempSums = np.sum(channelSums, axis=1)
+# bestN = 10 # find 10 best channels
+# bestChannels = np.argpartition(tempSums, -bestN)[-bestN:]
+# bestChannels = bestChannels[np.argsort(tempSums[bestChannels])]
+# print bestChannels
 
 # plot channel differences
 plt.imshow(channelSums, cmap=cm.gist_rainbow, vmin=0, vmax=1)
