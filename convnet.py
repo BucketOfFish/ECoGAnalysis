@@ -109,7 +109,8 @@ def main(_):
     correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_truth,1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
-    # initialize variables
+    # initialize session and variables
+    # sess = tf.InteractiveSession(config=tf.ConfigProto(log_device_placement=True)) # print out CPU/GPU device usage
     sess = tf.InteractiveSession()
     sess.run(tf.global_variables_initializer())
 
