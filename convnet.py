@@ -1,6 +1,10 @@
+import matplotlib
+matplotlib.use('Agg') # remove reliance on X-frame
+import matplotlib.pyplot as plt
 import tensorflow as tf
 import h5py
 import numpy as np
+import os
 
 def main(_):
 
@@ -116,7 +120,9 @@ def main(_):
 
     # run
     print("Starting training")
-    for i in range(2000):
+    train_accuracies = []
+    test_accuracies = []
+    for i in range(10):
         batchN = i%(trainingSize/batchSize)
         x_batch = x_train[batchN*batchSize: (batchN+1)*batchSize]
         y_batch = y_train[batchN*batchSize: (batchN+1)*batchSize]
@@ -124,10 +130,24 @@ def main(_):
            train_accuracy = accuracy.eval(feed_dict={x:x_batch, y_truth:y_batch, keep_prob:1.0})
            test_accuracy = accuracy.eval(feed_dict={x:x_test, y_truth:y_test, keep_prob:1.0})
            print("step %d, training accuracy %g, test accuracy %g"%(i, train_accuracy, test_accuracy))
+           train_accuracies.append(train_accuracy)
+           test_accuracies.append(test_accuracy)
         train_step.run(feed_dict={x:x_batch, y_truth:y_batch, keep_prob:0.5})
 
     # final accuracy
     print("test accuracy %g"%accuracy.eval(feed_dict={x:x_test, y_truth:y_test, keep_prob:1.0}))
+
+    # plot accuracies
+    indices = np.arange(len(train_accuracies))
+    plt.plot(indices, train_accuracies)
+    plt.plot(indices, test_accuracies)
+    plt.legend(['train', 'test'])
+    plt.title("Training and Test Accuracy vs. Training Steps")
+    plt.xlabel("Training step")
+    plt.ylabel("Accuracy")
+    directory = "Plots/Training/"
+    if not os.path.exists(directory): os.makedirs(directory)
+    plt.savefig(directory + "Training.pdf", bbox_inches="tight")
 
 if __name__ == '__main__':
   tf.app.run(main=main)
