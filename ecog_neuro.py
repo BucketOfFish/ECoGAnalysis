@@ -1,10 +1,10 @@
-__authors__ = "Jesse Livezey"
-
 from __future__ import division
 import numpy as np
 import scipy as sp
 import h5py, os
 from sklearn.decomposition import PCA
+
+__authors__ = "Jesse Livezey"
 
 ###########
 # Options #
@@ -135,7 +135,10 @@ class ECoG():
 
                 if valid_end > valid_start:
                     valid_idx = order[valid_start:valid_end]
-                else: valid_idx = np.hstack((order[valid_start:],order[:valid_end])) assert valid_idx.size == n_valid 
+                else:
+                    valid_idx = np.hstack((order[valid_start:],order[:valid_end]))
+                assert valid_idx.size == n_valid 
+
                 if test_end > test_start:
                     test_idx = order[test_start:test_end]
                 else:
