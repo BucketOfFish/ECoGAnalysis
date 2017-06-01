@@ -5,6 +5,7 @@ import tensorflow as tf
 import h5py
 import numpy as np
 import os
+from shutil import copyfile
 
 def main(_):
 
@@ -20,20 +21,28 @@ def main(_):
     trainingSize = 1800
     batchSize = 163
 
-    useBestChannels = False # whether to use only a subset of ECoG channels
+    useBestChannels = True # whether to use only a subset of ECoG channels
     bestChannels = [34, 27, 37, 36, 25, 38, 42, 33, 24, 23] # channels to use - (ordered worst to best, but it doesn't matter)
 
-    netType = "FC" # options are "FC" and "conv"
-    FCLayerSize = 798
+    netType = "FC2" # options are "FC", "FC2", and "conv"
+    FCLayerSize = 100
 
-    optimizerName = "momentum" # options are 'Adam' and 'momentum'
-    learningRate = pow(10, -2.48)
-    momentum = pow(10, -0.83)
+    optimizerName = "momentum" # options are "Adam" and "momentum"
+    learningRate = pow(10, -1)
+    momentum = pow(10, -2)
 
-    inputDropoutRate = 0.44
+    inputDropoutRate = 0.00
     dropoutRate = 0.80
 
-    delta = pow(10, -4) # when to stop training
+    weightInitType = "Gaussian" # options are "uniform" and "Gaussian"
+    weightInit = pow(10, -2.7) # start all weight matrix entries at this value
+
+    stopType = "epochs" # choices are "epochs" and "delta"
+    epochs = 500 # when to stop training
+    delta = pow(10, -4)
+
+    printoutPeriod = 1
+    saveName = "inputDropout0_dropout0p8_momentum_FC2:100_lrE-1_momentumE-2_batchSize163_useBestChannelsTrue_weightGaussian"
 
     #########
     # SETUP #
@@ -64,7 +73,12 @@ def main(_):
 
     # weight and bias initialization
     def weight_variable(shape):
-        initial = tf.truncated_normal(shape, stddev=0.1)
+        if weightInitType == "Gaussian":
+            initial = tf.truncated_normal(shape, stddev=weightInit)
+        elif weightInitType == "uniform":
+            initial = tf.ones(shape) * weightInit
+        else:
+            initial = tf.zeros(shape)
         return tf.Variable(initial)
 
     def bias_variable(shape):
@@ -86,17 +100,16 @@ def main(_):
     x = tf.placeholder(tf.float32, [None, channels, timeSteps, 1])
     y_truth = tf.placeholder(tf.float32, shape=[None, nClasses])
 
-    # not implemented - make the dropout layer a placeholder, so I can set to 1
-    ## input dropout layer
-    # keep_prob = tf.placeholder(tf.float32) # can be turned off by setting to 1
-    # h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
+    # input dropout layer
+    input_keep_prob = tf.placeholder(tf.float32) # can be turned off by setting to 1
+    x_drop = tf.nn.dropout(x, input_keep_prob)
 
     if netType == "conv":
 
         # conv layer 1
         W_conv1 = weight_variable([2, 70, 1, 32]) # compute 32 features for each patch
         b_conv1 = bias_variable([32])
-        h_conv1 = tf.nn.relu(conv2d(x, W_conv1, stride=1) + b_conv1)
+        h_conv1 = tf.nn.relu(conv2d(x_drop, W_conv1, stride=1) + b_conv1)
         h_pool1 = max_pool(h_conv1, size=2)
         print h_conv1.shape
         print h_pool1.shape
@@ -118,25 +131,46 @@ def main(_):
 
         # dropout layer
         keep_prob = tf.placeholder(tf.float32) # can be turned off by setting to 1
-        h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
+        h_last = tf.nn.dropout(h_fc1, keep_prob)
 
-    elif netType == "FC":
-
+    elif netType == "FC": # fully connected - 1 layer
+ 
         # densely connected layer
-        inputLayerSize = int(x.shape[1] * x.shape[2] * x.shape[3])
+        inputLayerSize = int(x_drop.shape[1] * x_drop.shape[2] * x_drop.shape[3])
         W_fc1 = weight_variable([inputLayerSize, FCLayerSize])
         b_fc1 = bias_variable([FCLayerSize])
-        x_flat = tf.reshape(x, [-1, inputLayerSize])
+        x_flat = tf.reshape(x_drop, [-1, inputLayerSize])
+        h_fc1 = tf.nn.relu(tf.matmul(x_flat, W_fc1) + b_fc1)
+
+        # dropout layer
+        keep_prob = tf.placeholder(tf.float32) # can be turned off by setting to 1
+        h_last = tf.nn.dropout(h_fc1, keep_prob)
+
+    elif netType == "FC2": # fully connected - 2 layers
+ 
+        # densely connected layer
+        inputLayerSize = int(x_drop.shape[1] * x_drop.shape[2] * x_drop.shape[3])
+        W_fc1 = weight_variable([inputLayerSize, FCLayerSize])
+        b_fc1 = bias_variable([FCLayerSize])
+        x_flat = tf.reshape(x_drop, [-1, inputLayerSize])
         h_fc1 = tf.nn.relu(tf.matmul(x_flat, W_fc1) + b_fc1)
 
         # dropout layer
         keep_prob = tf.placeholder(tf.float32) # can be turned off by setting to 1
         h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
+ 
+        # densely connected layer
+        W_fc2 = weight_variable([FCLayerSize, FCLayerSize])
+        b_fc2 = bias_variable([FCLayerSize])
+        h_fc2 = tf.nn.relu(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
+
+        # dropout layer 2
+        h_last = tf.nn.dropout(h_fc2, keep_prob)
 
     # readout layer
-    W_fc2 = weight_variable([FCLayerSize, nClasses])
-    b_fc2 = bias_variable([nClasses])
-    y = tf.matmul(h_fc1_drop, W_fc2) + b_fc2
+    W_readout = weight_variable([FCLayerSize, nClasses])
+    b_readout = bias_variable([nClasses])
+    y = tf.matmul(h_last, W_readout) + b_readout
 
     ############
     # TRAINING #
@@ -144,13 +178,12 @@ def main(_):
 
     # set up optimizer
     cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_truth, logits=y))
-    optimizerParameters = {'learning_rate': learningRate}
-    optimizer = tf.train.GradientDescentOptimizer(*optimizerParameters)
     if optimizerName == "Adam":
-        optimizer = tf.train.AdamOptimizer(*optimizerParameters)
+        optimizer = tf.train.AdamOptimizer(learning_rate=learningRate)
     elif optimizerName == "momentum": # gradient descent with momentum
-        optimizerParameters['momentum'] = momentum
-        optimizer = tf.train.MomentumOptimizer(learning_rate=learningRate, momentum=momentum) # fix this
+        optimizer = tf.train.MomentumOptimizer(learning_rate=learningRate, momentum=momentum)
+    else: # default gradient descent
+        optimizer = tf.train.GradientDescentOptimizer(learning_rate=learningRate)
     train_step = optimizer.minimize(cross_entropy)
 
     # accuracy
@@ -167,22 +200,32 @@ def main(_):
     train_accuracies = []
     test_accuracies = []
     batchCount = 0
-    #while len(train_accuracies) < 10 or abs(train_accuracies[-1] - train_accuracies[-10]) > delta:
-    for i in range(5000):
-        batchCount += 1
-        batchN = batchCount%(trainingSize/batchSize)
-        x_batch = x_train[batchN*batchSize: (batchN+1)*batchSize]
+    epochCount = 0
+    nBatchesInEpoch = trainingSize/batchSize
+
+    keepLooping = True
+    while keepLooping:
+
+        if stopType == "epochs":
+            keepLooping = (epochCount <= epochs)
+        elif stopType == "delta":
+            keepLooping = (len(train_accuracies) < 10 or abs(train_accuracies[-1] - train_accuracies[-10]) > delta) # CHECKPOINT - fix this
+
+        batchN = batchCount % nBatchesInEpoch
+        if batchN == 0:
+            epochCount += 1
+        x_batch = x_train[batchN*batchSize: (batchN+1)*batchSize] # CHECKPOINT - remainder not used? go through logic in this block
         y_batch = y_train[batchN*batchSize: (batchN+1)*batchSize]
-        if batchCount%1 == 0: # print accuracy
-           train_accuracy = accuracy.eval(feed_dict={x:x_batch, y_truth:y_batch, keep_prob:1.0})
-           test_accuracy = accuracy.eval(feed_dict={x:x_test, y_truth:y_test, keep_prob:1.0})
+
+        if batchCount % printoutPeriod == 0: # print accuracy
+           train_accuracy = accuracy.eval(feed_dict={x:x_batch, y_truth:y_batch, input_keep_prob:1.0, keep_prob:1.0})
+           test_accuracy = accuracy.eval(feed_dict={x:x_test, y_truth:y_test, input_keep_prob:1.0, keep_prob:1.0})
            print("step %d, training accuracy %g, test accuracy %g"%(batchCount, train_accuracy, test_accuracy))
            train_accuracies.append(train_accuracy)
            test_accuracies.append(test_accuracy)
-        train_step.run(feed_dict={x:x_batch, y_truth:y_batch, keep_prob:1-dropoutRate})
 
-    # final accuracy
-    print("test accuracy %g"%accuracy.eval(feed_dict={x:x_test, y_truth:y_test, keep_prob:1.0}))
+        batchCount += 1
+        train_step.run(feed_dict={x:x_batch, y_truth:y_batch, input_keep_prob:1-inputDropoutRate, keep_prob:1-dropoutRate})
 
     # plot accuracies
     indices = np.arange(len(train_accuracies))
@@ -192,15 +235,18 @@ def main(_):
     plt.title("Training and Test Accuracy vs. Training Steps")
     plt.xlabel("Training step")
     plt.ylabel("Accuracy")
-    directory = "Plots/Training/"
+    directory = "Plots/" + saveName + "/"
     if not os.path.exists(directory): os.makedirs(directory)
-    plt.savefig(directory + "Training.pdf", bbox_inches="tight")
+    plt.savefig(directory + "Accuracy.pdf", bbox_inches="tight")
 
     # save accuracies
-    dataFile = h5py.File(directory + "TrainingData.h5", "w")
+    dataFile = h5py.File(directory + "AccuracyData.h5", "w")
     dataFile.create_dataset('trainingAccuracy', data=train_accuracies)
     dataFile.create_dataset('testAccuracy', data=test_accuracies)
     dataFile.close()
+
+    # save code
+    copyfile("convnet.py", directory + "convnet.py")
 
 if __name__ == '__main__':
     tf.app.run(main=main)
