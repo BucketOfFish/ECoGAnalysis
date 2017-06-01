@@ -48,6 +48,11 @@ def main(_):
     # SETUP #
     #########
 
+    # save code
+    directory = "Plots/" + saveName + "/"
+    if not os.path.exists(directory): os.makedirs(directory)
+    copyfile("convnet.py", directory + "convnet.py")
+
     # load data
     data = h5py.File("Data/EC2_blocks_1_8_9_15_76_89_105_CV_HG_align_window_-0.5_to_0.79_file_nobaseline.h5")
     x_data = data['Xhigh gamma'][:]
@@ -235,8 +240,6 @@ def main(_):
     plt.title("Training and Test Accuracy vs. Training Steps")
     plt.xlabel("Training step")
     plt.ylabel("Accuracy")
-    directory = "Plots/" + saveName + "/"
-    if not os.path.exists(directory): os.makedirs(directory)
     plt.savefig(directory + "Accuracy.pdf", bbox_inches="tight")
 
     # save accuracies
@@ -244,9 +247,6 @@ def main(_):
     dataFile.create_dataset('trainingAccuracy', data=train_accuracies)
     dataFile.create_dataset('testAccuracy', data=test_accuracies)
     dataFile.close()
-
-    # save code
-    copyfile("convnet.py", directory + "convnet.py")
 
 if __name__ == '__main__':
     tf.app.run(main=main)
