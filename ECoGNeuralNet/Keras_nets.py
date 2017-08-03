@@ -22,50 +22,13 @@ def main():
 
     trainingSize = 1800
     batchSize = 10
-    epochs = 100 # when to stop training
+    epochs = 200 # when to stop training
     dropoutRate = 0.50
 
-    saveName = "CNN_AllChannels_1x1Layers"
+    saveName = "CNN_AllChannels_3Layer_5filter_BestChannels_200Epochs"
 
-    useBestChannels = False # whether to use only a subset of ECoG channels
+    useBestChannels = True # whether to use only a subset of ECoG channels
     bestChannels = [34, 27, 37, 36, 25, 38, 42, 33, 24, 23] # channels to use - (ordered worst to best, but it doesn't matter)
-
-    #########
-    # MODEL #
-    #########
-
-    model = Sequential()
-    model.add(Conv2D(32, kernel_size=(channels, 5),
-		     strides=(1,2),
-		     activation='relu',
-		     input_shape=(channels, timeSteps, 1)))
-    model.add(Dropout(dropoutRate))
-    model.add(Conv2D(64, kernel_size=(1, 5),
-		     strides=(1,2),
-		     activation='relu'))
-    model.add(Dropout(dropoutRate))
-    model.add(Conv2D(16, kernel_size=(1, 1),
-		     strides=(1,2),
-		     activation='relu'))
-    model.add(Dropout(dropoutRate))
-    model.add(Conv2D(32, kernel_size=(1, 5),
-		     strides=(1,2),
-		     activation='relu'))
-    model.add(Dropout(dropoutRate))
-    model.add(Conv2D(64, kernel_size=(1, 5),
-		     strides=(1,2),
-		     activation='relu'))
-    model.add(Dropout(dropoutRate))
-    model.add(Flatten())
-    model.add(Dense(128, activation='relu'))
-    model.add(Dropout(dropoutRate))
-    model.add(Dense(nClasses, activation='softmax'))
-
-    model.compile(loss=keras.losses.categorical_crossentropy,
-		  optimizer=keras.optimizers.Adadelta(),
-		  metrics=['accuracy'])
-
-    model.summary()
 
     #########
     # SETUP #
@@ -102,6 +65,35 @@ def main():
     x_test = x_data[trainingSize:]
     y_train = y_data[0:trainingSize]
     y_test = y_data[trainingSize:]
+
+    #########
+    # MODEL #
+    #########
+
+    model = Sequential()
+    model.add(Conv2D(32, kernel_size=(channels, 5),
+		     strides=(1,2),
+		     activation='relu',
+		     input_shape=(channels, timeSteps, 1)))
+    model.add(Dropout(dropoutRate))
+    model.add(Conv2D(64, kernel_size=(1, 5),
+		     strides=(1,2),
+		     activation='relu'))
+    model.add(Dropout(dropoutRate))
+    model.add(Conv2D(128, kernel_size=(1, 5),
+		     strides=(1,2),
+		     activation='relu'))
+    model.add(Dropout(dropoutRate))
+    model.add(Flatten())
+    model.add(Dense(128, activation='relu'))
+    model.add(Dropout(dropoutRate))
+    model.add(Dense(nClasses, activation='softmax'))
+
+    model.compile(loss=keras.losses.categorical_crossentropy,
+		  optimizer=keras.optimizers.Adadelta(),
+		  metrics=['accuracy'])
+
+    model.summary()
 
     ############
     # TRAINING #
