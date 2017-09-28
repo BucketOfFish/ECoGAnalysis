@@ -66,7 +66,7 @@ def main(_):
     momentum = pow(10, -2)
 
     inputDropoutRate = 0
-    dropoutRate = 0.70
+    dropoutRate = 0.80
 
     weightInitType = "Gaussian" # options are "uniform" and "Gaussian"
     weightInit = pow(10, -2.7) # uniform value, or Gaussian standard deviation
@@ -76,7 +76,7 @@ def main(_):
     delta = pow(10, -4)
 
     printoutPeriod = 100
-    saveName = "inputDropout0_dropout0p7_momentum_FC3:50_lrE-1_batchSize163_useReducedDataTrue_weightGaussian"
+    saveName = "inputDropout0_dropout0p8_momentum_FC3:50_lrE-1_batchSize163_useReducedDataTrue_weightGaussian"
 
     #########
     # SETUP #

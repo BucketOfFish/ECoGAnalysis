@@ -58,25 +58,25 @@ def main(_):
     21054, 21123, 21136, 21180, 21229, 21326, 21396, 21406, 21453, 21460, 21475, 21515, 21535, 21579, 21598, 21744, 21780,
     21792, 21840, 21967, 22000, 22013, 22121, 22121, 22144, 22165] # pixels to keep
 
-    netType = "FC3" # options are "FC", "FC2", "FC3", and "conv"
-    FCLayerSize = 50
+    netType = "FC2" # options are "FC", "FC2", and "conv"
+    FCLayerSize = 100
 
-    optimizerName = "momentum" # options are "Adam", "momentum", and "Adadelta"
-    learningRate = pow(10, -1)
+    optimizerName = "Adadelta" # options are "Adam", "momentum", and "Adadelta"
+    learningRate = pow(10, -3)
     momentum = pow(10, -2)
 
     inputDropoutRate = 0
-    dropoutRate = 0.70
+    dropoutRate = 0.50
 
     weightInitType = "Gaussian" # options are "uniform" and "Gaussian"
     weightInit = pow(10, -2.7) # uniform value, or Gaussian standard deviation
 
     stopType = "epochs" # choices are "epochs" and "delta"
-    epochs = 2000 # when to stop training
+    epochs = 5000 # when to stop training
     delta = pow(10, -4)
 
     printoutPeriod = 100
-    saveName = "inputDropout0_dropout0p7_momentum_FC3:50_lrE-1_batchSize163_useReducedDataTrue_weightGaussian"
+    saveName = "inputDropout0_dropout0p5_Adadelta_FC2:100_lrE-3_batchSize163_useReducedDataTrue_weightGaussian"
 
     #########
     # SETUP #
@@ -215,34 +215,8 @@ def main(_):
         b_fc2 = bias_variable([FCLayerSize])
         h_fc2 = tf.nn.relu(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
 
-    elif netType == "FC3": # fully connected - 3 layers
- 
-        # densely connected layer
-        inputLayerSize = int(x_drop.shape[1] * x_drop.shape[2] * x_drop.shape[3])
-        W_fc1 = weight_variable([inputLayerSize, FCLayerSize])
-        b_fc1 = bias_variable([FCLayerSize])
-        x_flat = tf.reshape(x_drop, [-1, inputLayerSize])
-        h_fc1 = tf.nn.relu(tf.matmul(x_flat, W_fc1) + b_fc1)
-
-        # dropout layer
-        keep_prob = tf.placeholder(tf.float32) # can be turned off by setting to 1
-        h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
- 
-        # densely connected layer
-        W_fc2 = weight_variable([FCLayerSize, FCLayerSize])
-        b_fc2 = bias_variable([FCLayerSize])
-        h_fc2 = tf.nn.relu(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
-
-        # dropout layer
+        # dropout layer 2
         h_last = tf.nn.dropout(h_fc2, keep_prob)
- 
-        # densely connected layer
-        W_fc3 = weight_variable([FCLayerSize, FCLayerSize])
-        b_fc3 = bias_variable([FCLayerSize])
-        h_fc3 = tf.nn.relu(tf.matmul(h_fc1_drop, W_fc3) + b_fc3)
-
-        # dropout layer
-        h_last = tf.nn.dropout(h_fc3, keep_prob)
 
     # readout layer
     W_readout = weight_variable([FCLayerSize, nClasses])

@@ -66,17 +66,17 @@ def main(_):
     momentum = pow(10, -2)
 
     inputDropoutRate = 0
-    dropoutRate = 0.70
+    dropoutRate = 0.50
 
     weightInitType = "Gaussian" # options are "uniform" and "Gaussian"
     weightInit = pow(10, -2.7) # uniform value, or Gaussian standard deviation
 
     stopType = "epochs" # choices are "epochs" and "delta"
-    epochs = 2000 # when to stop training
+    epochs = 1000 # when to stop training
     delta = pow(10, -4)
 
     printoutPeriod = 100
-    saveName = "inputDropout0_dropout0p7_momentum_FC3:50_lrE-1_batchSize163_useReducedDataTrue_weightGaussian"
+    saveName = "inputDropout0_dropout0p5_momentum_FC3:50_lrE-1_batchSize163_useReducedDataTrue_weightGaussian"
 
     #########
     # SETUP #
