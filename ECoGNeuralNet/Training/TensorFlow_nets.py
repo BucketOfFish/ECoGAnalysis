@@ -14,13 +14,13 @@ def main(_):
     # SETTINGS #
     ############
 
-    samples = 2572 # number of total events
+    samples = 28500 # number of total events
     nClasses = 57
     channels = 86 # ECoG channels
     timeSteps = 258 # time steps per sample
 
     trainingSize = int(samples * 0.8)
-    batchSize = 163
+    batchSize = 100
 
     useReducedData = True # whether to use only a subset of ECoG data - not compatible with conv net!
     reducedInputs = [39, 257, 388, 422, 434, 552, 611, 626, 834, 1066, 1074, 1087, 1110, 1361, 1369, 1398, 1415, 1428, 1477,
@@ -72,11 +72,11 @@ def main(_):
     weightInit = pow(10, -2.7) # uniform value, or Gaussian standard deviation
 
     stopType = "epochs" # choices are "epochs" and "delta"
-    epochs = 2000 # when to stop training
+    epochs = 500 # when to stop training
     delta = pow(10, -4)
 
     printoutPeriod = 100
-    saveName = "inputDropout0_dropout0p7_momentum_FC3:50_lrE-1_batchSize163_useReducedDataTrue_weightGaussian"
+    saveName = "expandedDataset_inputDropout0_dropout0p7_momentum_FC3:50_lrE-1_batchSize100_useReducedDataTrue_weightGaussian"
 
     #########
     # SETUP #
@@ -88,7 +88,8 @@ def main(_):
     copyfile("TensorFlow_nets.py", directory + "TensorFlow_nets.py")
 
     # load data
-    data = h5py.File("../../Data/EC2_blocks_1_8_9_15_76_89_105_CV_HG_align_window_-0.5_to_0.79_file_nobaseline.h5")
+    data = h5py.File("../../Data/Expanded_ECoG.h5")
+    #data = h5py.File("../../Data/EC2_blocks_1_8_9_15_76_89_105_CV_HG_align_window_-0.5_to_0.79_file_nobaseline.h5")
     x_data = data['Xhigh gamma'][:]
     y_predata = data['y'][:]
 
