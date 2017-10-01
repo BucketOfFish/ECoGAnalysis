@@ -1,4 +1,4 @@
-Data/ contains the ECoG data that we analyze. Right now I have high-gamma data taken from a single English-speaking patient, gathered via a 1300 mm^2 implant on the ventral sensorimotor cortex. Roughly 45 repetitions of each of 57 phonemes (19 consonants + 3 vowels) were gathered.
+Data/ (in a higher directory) contains the ECoG data that we analyze. Right now I have high-gamma data taken from a single English-speaking patient, gathered via a 1300 mm^2 implant on the ventral sensorimotor cortex. Roughly 45 repetitions of each of 57 phonemes (19 consonants + 3 vowels) were gathered.
 
 Plots/ contains outputs from the plotting scripts, including the data used to make the plots, in h5 format.
 

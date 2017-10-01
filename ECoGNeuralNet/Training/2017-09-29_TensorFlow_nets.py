@@ -83,12 +83,12 @@ def main(_):
     #########
 
     # save code
-    directory = "Outputs/" + saveName + "/"
+    directory = "../Outputs/" + saveName + "/"
     if not os.path.exists(directory): os.makedirs(directory)
-    copyfile("TensorFlow_nets.py", directory + "TensorFlow_nets.py")
+    copyfile(__file__, directory + "Training.py")
 
     # load data
-    data = h5py.File("../../Data/Expanded_ECoG.h5")
+    data = h5py.File("../../../Data/Expanded_ECoG.h5")
     #data = h5py.File("../../Data/EC2_blocks_1_8_9_15_76_89_105_CV_HG_align_window_-0.5_to_0.79_file_nobaseline.h5")
     x_data = data['Xhigh gamma'][:]
     y_predata = data['y'][:]
