@@ -1,8 +1,9 @@
 % Matlab code
 
-h5Name = 'EC2_blocks_1_8_9_15_76_89_105_CV_HG_align_window_-0.5_to_0.79_file_nobaseline.h5';
-LMDBTest = 'ECoG_test';
-LMDBTrain = 'ECoG_train';
+path = '/home/matt/Projects/Data/ECoG/ExpandedIsolatedGaussian/';
+h5Name = path + 'Expanded_ECoG_285Isolated_GaussianNoise.h5';
+LMDBTest = path + 'ECoG_test';
+LMDBTrain = path + 'ECoG_train';
 nTest = 2000;
 nTrain = 572;
 
