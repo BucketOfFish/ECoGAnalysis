@@ -1,11 +1,7 @@
-ECoGEednTraining/ is all the stuff for training a spiking neural net.
+ECoGEednTraining/ is all the stuff for training a spiking neural net. It contains training files, as well as a folder mnist/ containing a spiking net training tutorial for the MNIST dataset, done in MATLAB. Read the TrueNorth documentation to see how to run it. It also contains scripts for converting from H5 to LMDB data. Output/ holds the output for spiking net training.
 
-ECoGNeuralNet/ is stuff for ECoG training in Python.
+ECoGNeuralNet/ is stuff for ECoG training, data generation, and plotting in Python.
 
 matlab.sh is a setup script for MATLAB, for getting the correct paths and stuff. I don't think it's necessary right now.
-
-mnist/ is a spiking net training tutorial for the MNIST dataset, done in MATLAB. Read the TrueNorth documentation to see how to run it.
-
-Output/ holds the output for spiking net training.
 
 TrueNorth_DevKit_2016b/ is all the True North installation material and manuals.
