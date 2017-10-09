@@ -7,20 +7,26 @@ import numpy as np
 import os
 from shutil import copyfile
 import random
+import skopt
 
-def main(_):
+def main(args):
+
+    batchSize=args[0]
+    FCLayerSize=args[1]
+    learningRate=args[2]
+    momentum=args[3]
+    dropoutRate=args[4]
 
     ############
     # SETTINGS #
     ############
 
-    samples = 2572 # number of total events
+    samples = 28500 # number of total events
     nClasses = 57
     channels = 86 # ECoG channels
     timeSteps = 258 # time steps per sample
 
-    trainingSize = int(samples * 0.8)
-    batchSize = 163
+    trainingSize = 28500
 
     useReducedData = True # whether to use only a subset of ECoG data - not compatible with conv net!
     reducedInputs = [39, 257, 388, 422, 434, 552, 611, 626, 834, 1066, 1074, 1087, 1110, 1361, 1369, 1398, 1415, 1428, 1477,
@@ -59,61 +65,60 @@ def main(_):
     21792, 21840, 21967, 22000, 22013, 22121, 22121, 22144, 22165] # pixels to keep
 
     netType = "FC3" # options are "FC", "FC2", "FC3", and "conv"
-    FCLayerSize = 50
 
     optimizerName = "momentum" # options are "Adam", "momentum", and "Adadelta"
-    learningRate = pow(10, -1)
-    momentum = pow(10, -2)
 
     inputDropoutRate = 0
-    dropoutRate = 0.70
 
     weightInitType = "Gaussian" # options are "uniform" and "Gaussian"
     weightInit = pow(10, -2.7) # uniform value, or Gaussian standard deviation
 
     stopType = "epochs" # choices are "epochs" and "delta"
-    epochs = 2000 # when to stop training
+    epochs = 100 # when to stop training
     delta = pow(10, -4)
 
     printoutPeriod = 100
-    saveName = "inputDropout0_dropout0p7_momentum_FC3:50_lrE-1_batchSize163_useReducedDataTrue_weightGaussian"
+    #saveName = "expandedIsolatedGaussianNoiseDataset_inputDropout0_dropout0p5_momentum_FC3:50_lrE-1_batchSize100_useReducedDataTrue_weightGaussian"
+    saveName = "optimizationTest"
 
     #########
     # SETUP #
     #########
 
     # save code
-    directory = "Outputs/" + saveName + "/"
+    directory = "../Outputs/" + saveName + "/"
     if not os.path.exists(directory): os.makedirs(directory)
-    copyfile("TensorFlow_nets.py", directory + "TensorFlow_nets.py")
+    copyfile(__file__, directory + "Training.py")
 
     # load data
-    data = h5py.File("../../Data/EC2_blocks_1_8_9_15_76_89_105_CV_HG_align_window_-0.5_to_0.79_file_nobaseline.h5")
-    x_data = data['Xhigh gamma'][:]
-    y_predata = data['y'][:]
+    data = h5py.File("../../../Data/ECoG/Expanded_ECoG_285Isolated_GaussianNoise.h5")
+    #data = h5py.File("../../Data/EC2_blocks_1_8_9_15_76_89_105_CV_HG_align_window_-0.5_to_0.79_file_nobaseline.h5")
+    x_train = data['Xhigh gamma'][:]
+    y_pretrain = data['y'][:]
+    x_test = data['Xhigh gamma isolated'][:]
+    y_pretest = data['y isolated'][:]
 
     # shaping data and changing to one hot format
     if useReducedData:
-        x_data = x_data.reshape(x_data.shape[0], -1) # make 1D
-        x_data = x_data[:,reducedInputs] # use reduced input
-        x_data = x_data[..., np.newaxis, np.newaxis] # add dimensions to make input work out
+        x_train = x_train.reshape(x_train.shape[0], -1) # make 1D
+        x_train = x_train[:,reducedInputs] # use reduced input
+        x_train = x_train[..., np.newaxis, np.newaxis] # add dimensions to make input work out
+        x_test = x_test.reshape(x_test.shape[0], -1) # make 1D
+        x_test = x_test[:,reducedInputs] # use reduced input
+        x_test = x_test[..., np.newaxis, np.newaxis] # add dimensions to make input work out
     else:
-        x_data = x_data[..., np.newaxis] # add that fourth dimension for 2D conv 
-    y_data = np.zeros((samples, nClasses))
-    y_data[np.arange(samples), y_predata] = 1
-    del y_predata
+        x_train = x_train[..., np.newaxis] # add that fourth dimension for 2D conv 
+        x_test = x_test[..., np.newaxis] # add that fourth dimension for 2D conv 
+    y_train = np.zeros((samples, nClasses))
+    y_train[np.arange(samples), y_pretrain] = 1
+    y_test = np.zeros((y_pretest.shape[0], nClasses))
+    y_test[np.arange(y_pretest.shape[0]), y_pretest] = 1
+    del y_pretrain, y_pretest, data
 
     # shuffle
-    z = zip(x_data, y_data)
+    z = zip(x_train, y_train)
     random.shuffle(z)
-    x_data, y_data = zip(*z)
-
-    # split test and train
-    # CHECKPOINT - do this smarter, and use TensorFlow's batching functions
-    x_train = x_data[0:trainingSize]
-    x_test = x_data[trainingSize:]
-    y_train = y_data[0:trainingSize]
-    y_test = y_data[trainingSize:]
+    x_train, y_train = zip(*z)
 
     # weight and bias initialization
     def weight_variable(shape):
@@ -275,7 +280,7 @@ def main(_):
     sess.run(tf.global_variables_initializer())
 
     # run
-    print("Starting training")
+    #print("Starting training")
     train_accuracies = []
     test_accuracies = []
     batchCount = 0
@@ -299,28 +304,36 @@ def main(_):
         if batchCount % printoutPeriod == 0: # print accuracy
            train_accuracy = accuracy.eval(feed_dict={x:x_batch, y_truth:y_batch, input_keep_prob:1.0, keep_prob:1.0})
            test_accuracy = accuracy.eval(feed_dict={x:x_test, y_truth:y_test, input_keep_prob:1.0, keep_prob:1.0})
-           print("step %d, training accuracy %g, test accuracy %g"%(batchCount, train_accuracy, test_accuracy))
+           #print("step %d, training accuracy %g, test accuracy %g"%(batchCount, train_accuracy, test_accuracy))
            train_accuracies.append(train_accuracy)
            test_accuracies.append(test_accuracy)
 
         batchCount += 1
         train_step.run(feed_dict={x:x_batch, y_truth:y_batch, input_keep_prob:1-inputDropoutRate, keep_prob:1-dropoutRate})
 
-    # plot accuracies
-    indices = np.arange(len(train_accuracies))
-    plt.plot(indices, train_accuracies)
-    plt.plot(indices, test_accuracies)
-    plt.legend(['train', 'test'])
-    plt.title("Training and Test Accuracy vs. Training Steps")
-    plt.xlabel("Training step")
-    plt.ylabel("Accuracy")
-    plt.savefig(directory + "Accuracy.pdf", bbox_inches="tight")
+    ## plot accuracies
+    #indices = np.arange(len(train_accuracies))
+    #plt.plot(indices, train_accuracies)
+    #plt.plot(indices, test_accuracies)
+    #plt.legend(['train', 'test'])
+    #plt.title("Training and Test Accuracy vs. Training Steps")
+    #plt.xlabel("Training step")
+    #plt.ylabel("Accuracy")
+    #plt.savefig(directory + "Accuracy.pdf", bbox_inches="tight")
 
-    # save accuracies
-    dataFile = h5py.File(directory + "AccuracyData.h5", "w")
-    dataFile.create_dataset('trainingAccuracy', data=train_accuracies)
-    dataFile.create_dataset('testAccuracy', data=test_accuracies)
-    dataFile.close()
+    ## save accuracies
+    #dataFile = h5py.File(directory + "AccuracyData.h5", "w")
+    #dataFile.create_dataset('trainingAccuracy', data=train_accuracies)
+    #dataFile.create_dataset('testAccuracy', data=test_accuracies)
+    #dataFile.close()
+
+    print args
+    print 1-np.mean(test_accuracies[-10:])
+    return 1-np.mean(test_accuracies[-10:])
+
+def helperFunc(x):
+    tf.app.run(main=main, argv=x)
 
 if __name__ == '__main__':
-    tf.app.run(main=main)
+    res = skopt.gp_minimize(main, [(50, 200), (20, 200), (0.001, 0.5), (0.001, 0.1), (0, 0.7)])
+    skopt.dump(res, "OptFile", store_objective=False, n_calls=10) # only do 10 passes, then warm-call with the last result to keep minimizing

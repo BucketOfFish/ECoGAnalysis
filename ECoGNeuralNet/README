@@ -1,12 +1,18 @@
-Data/ contains the ECoG data that we analyze. Right now I have high-gamma data taken from a single English-speaking patient, gathered via a 1300 mm^2 implant on the ventral sensorimotor cortex. Roughly 45 repetitions of each of 57 phonemes (19 consonants + 3 vowels) were gathered.
+Data/ (in a higher directory) contains the ECoG data that we analyze. Right now I have high-gamma data taken from a single English-speaking patient, gathered via a 1300 mm^2 implant on the ventral sensorimotor cortex. Roughly 45 repetitions of each of 57 phonemes (19 consonants + 3 vowels) were gathered.
 
-Plot/ contains outputs from the plotting scripts, including the data used to make the plots, in h5 format.
+Plots/ contains outputs from the plotting scripts, including the data used to make the plots, in h5 format.
+
+Training/ contains all the scripts which have been used to run neural nets.
+
+Misc/ contains all other scripts.
+
+-----------------------------------
+
+Contents of Misc/:
 
 plotECoG.py plots ECoG data in 2D color plots, also plotting the average ECoG signals for each phoneme.
 
 channelCorrelation.py was a script used to show how important each channel is to the final phoneme production. May need to be tweaked to provide better measures in the future, as right now it's mostly based on integrated intensity.
-
-convnet.py was my own attempt at a neural net implementation from scratch.
 
 ecog_neuro.py is Jesse and Kris's original code, used in their 2015 paper. It seems to be used just to split and label data, though I should ask Jesse to be sure. In particular, setting the number of folds results in the self.indices vector being calculated, but this does not appear to be used for anything.
 
