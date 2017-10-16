@@ -1,14 +1,24 @@
+# Spiking net in Eedn did not have high accuracy. Checking the architecture using Keras to make sure it's even able to be used at all.
+
 import matplotlib
 matplotlib.use('Agg') # remove reliance on X-frame
 import matplotlib.pyplot as plt
-import tensorflow as tf
 import h5py
 import numpy as np
 import os
 from shutil import copyfile
 import random
+import keras
+from keras.models import Sequential
+from keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D
+import skopt
 
-def main(_):
+def main(args):
+
+    batchSize=args[0]
+    learningRate=args[2]
+    momentum=args[3]
+    dropoutRate=args[4]
 
     ############
     # SETTINGS #
@@ -20,7 +30,6 @@ def main(_):
     timeSteps = 258 # time steps per sample
 
     trainingSize = 28500
-    batchSize = 200
 
     useReducedData = True # whether to use only a subset of ECoG data - not compatible with conv net!
     reducedInputs = [39, 257, 388, 422, 434, 552, 611, 626, 834, 1066, 1074, 1087, 1110, 1361, 1369, 1398, 1415, 1428, 1477,
@@ -58,25 +67,21 @@ def main(_):
     21054, 21123, 21136, 21180, 21229, 21326, 21396, 21406, 21453, 21460, 21475, 21515, 21535, 21579, 21598, 21744, 21780,
     21792, 21840, 21967, 22000, 22013, 22121, 22121, 22144, 22165] # pixels to keep
 
-    netType = "FC3" # options are "FC", "FC2", "FC3", and "conv"
-    FCLayerSize = 200
+    netType = "spikingTest"
 
     optimizerName = "momentum" # options are "Adam", "momentum", and "Adadelta"
-    learningRate = 0.22
-    momentum = pow(10, -2)
 
     inputDropoutRate = 0
-    dropoutRate = 0.32
 
     weightInitType = "Gaussian" # options are "uniform" and "Gaussian"
     weightInit = pow(10, -2.7) # uniform value, or Gaussian standard deviation
 
     stopType = "epochs" # choices are "epochs" and "delta"
-    epochs = 150 # when to stop training
+    epochs = 100 # when to stop training
     delta = pow(10, -4)
 
     printoutPeriod = 100
-    saveName = "expandedIsolatedGaussianNoiseDataset_tunedHyperparameters_FC3:200_batchSize200_useReducedDataTrue_weightGaussian"
+    saveName = "spikingTest"
 
     #########
     # SETUP #
@@ -96,7 +101,18 @@ def main(_):
     y_pretest = data['y isolated'][:]
 
     # shaping data and changing to one hot format
-    if useReducedData:
+    if netType == 'spikingTest':
+        nEvents = x_train.shape[0]
+        x_train = x_train.reshape(nEvents, -1) # make 1D
+        x_train = x_train[:,reducedInputs] # use reduced input
+        x_train = x_train[..., np.newaxis, np.newaxis, np.newaxis] # add dimensions to make input work out
+        x_train = x_train.reshape(nEvents, 20, 30, -1) # make 2D
+        nEvents = x_test.shape[0]
+        x_test = x_test.reshape(nEvents, -1) # make 1D
+        x_test = x_test[:,reducedInputs] # use reduced input
+        x_test = x_test[..., np.newaxis, np.newaxis, np.newaxis] # add dimensions to make input work out
+        x_test = x_test.reshape(nEvents, 20, 30, -1) # make 2D
+    elif useReducedData:
         x_train = x_train.reshape(x_train.shape[0], -1) # make 1D
         x_train = x_train[:,reducedInputs] # use reduced input
         x_train = x_train[..., np.newaxis, np.newaxis] # add dimensions to make input work out
@@ -110,7 +126,7 @@ def main(_):
     y_train[np.arange(samples), y_pretrain] = 1
     y_test = np.zeros((y_pretest.shape[0], nClasses))
     y_test[np.arange(y_pretest.shape[0]), y_pretest] = 1
-    del y_pretrain, y_pretest
+    del y_pretrain, y_pretest, data
 
     # shuffle
     z = zip(x_train, y_train)
@@ -157,97 +173,36 @@ def main(_):
     input_keep_prob = tf.placeholder(tf.float32) # can be turned off by setting to 1
     x_drop = tf.nn.dropout(x, input_keep_prob)
 
-    if netType == "conv":
+    elif netType == "spikingTest": # testing the net I had in Eedn (but not spiking here)
 
+        # change input shape
+        x = tf.placeholder(tf.float32, [None, 20, 30, 1])
+
+        # input dropout layer
+        input_keep_prob = tf.placeholder(tf.float32) # can be turned off by setting to 1
+        x_drop = tf.nn.dropout(x, input_keep_prob)
+ 
         # conv layer 1
-        W_conv1 = weight_variable([2, 70, 1, 32]) # compute 32 features for each patch
-        b_conv1 = bias_variable([32])
-        h_conv1 = tf.nn.relu(conv2d(x_drop, W_conv1, stride=1) + b_conv1)
-        h_pool1 = max_pool(h_conv1, size=2)
-        print h_conv1.shape
-        print h_pool1.shape
+        W_conv1 = weight_variable([10, 10, 1, 16]) # compute 16 features for each 10x10 patch
+        b_conv1 = bias_variable([16])
+        h_conv1 = tf.nn.relu(conv2d(x_drop, W_conv1, stride=10) + b_conv1)
 
         # conv layer 2
-        W_conv2 = weight_variable([2, 5, 32, 64]) # compute 64 features for each 5x5 patch
-        b_conv2 = bias_variable([64])
-        h_conv2 = tf.nn.relu(conv2d(h_pool1, W_conv2, stride=1) + b_conv2)
-        h_pool2 = max_pool(h_conv2, size=2)
-        print h_conv2.shape
-        print h_pool2.shape
+        W_conv2 = weight_variable([2, 3, 16, 32]) # compute 32 features for each 2x3 patch
+        b_conv2 = bias_variable([32])
+        h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2, stride=1) + b_conv2)
 
-        # densely connected layer
-        layerSize = int(h_pool2.shape[1] * h_pool2.shape[2] * h_pool2.shape[3])
-        W_fc1 = weight_variable([layerSize, FCLayerSize])
-        b_fc1 = bias_variable([FCLayerSize])
-        h_pool2_flat = tf.reshape(h_pool2, [-1, layerSize])
-        h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
+        # conv layer 3
+        W_conv3 = weight_variable([1, 1, 32, 64]) # compute 64 features for each 1x1 patch
+        b_conv3 = bias_variable([64])
+        h_conv3 = tf.nn.relu(conv2d(h_conv2, W_conv3, stride=1) + b_conv3)
 
-        # dropout layer
-        keep_prob = tf.placeholder(tf.float32) # can be turned off by setting to 1
-        h_last = tf.nn.dropout(h_fc1, keep_prob)
-
-    elif netType == "FC": # fully connected - 1 layer
- 
-        # densely connected layer
-        inputLayerSize = int(x_drop.shape[1] * x_drop.shape[2] * x_drop.shape[3])
-        W_fc1 = weight_variable([inputLayerSize, FCLayerSize])
-        b_fc1 = bias_variable([FCLayerSize])
-        x_flat = tf.reshape(x_drop, [-1, inputLayerSize])
-        h_fc1 = tf.nn.relu(tf.matmul(x_flat, W_fc1) + b_fc1)
-
-        # dropout layer
-        keep_prob = tf.placeholder(tf.float32) # can be turned off by setting to 1
-        h_last = tf.nn.dropout(h_fc1, keep_prob)
-
-    elif netType == "FC2": # fully connected - 2 layers
- 
-        # densely connected layer
-        inputLayerSize = int(x_drop.shape[1] * x_drop.shape[2] * x_drop.shape[3])
-        W_fc1 = weight_variable([inputLayerSize, FCLayerSize])
-        b_fc1 = bias_variable([FCLayerSize])
-        x_flat = tf.reshape(x_drop, [-1, inputLayerSize])
-        h_fc1 = tf.nn.relu(tf.matmul(x_flat, W_fc1) + b_fc1)
-
-        # dropout layer
-        keep_prob = tf.placeholder(tf.float32) # can be turned off by setting to 1
-        h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
- 
-        # densely connected layer
-        W_fc2 = weight_variable([FCLayerSize, FCLayerSize])
-        b_fc2 = bias_variable([FCLayerSize])
-        h_fc2 = tf.nn.relu(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
-
-    elif netType == "FC3": # fully connected - 3 layers
- 
-        # densely connected layer
-        inputLayerSize = int(x_drop.shape[1] * x_drop.shape[2] * x_drop.shape[3])
-        W_fc1 = weight_variable([inputLayerSize, FCLayerSize])
-        b_fc1 = bias_variable([FCLayerSize])
-        x_flat = tf.reshape(x_drop, [-1, inputLayerSize])
-        h_fc1 = tf.nn.relu(tf.matmul(x_flat, W_fc1) + b_fc1)
-
-        # dropout layer
-        keep_prob = tf.placeholder(tf.float32) # can be turned off by setting to 1
-        h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
- 
-        # densely connected layer
-        W_fc2 = weight_variable([FCLayerSize, FCLayerSize])
-        b_fc2 = bias_variable([FCLayerSize])
-        h_fc2 = tf.nn.relu(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
-
-        # dropout layer
-        h_last = tf.nn.dropout(h_fc2, keep_prob)
- 
-        # densely connected layer
-        W_fc3 = weight_variable([FCLayerSize, FCLayerSize])
-        b_fc3 = bias_variable([FCLayerSize])
-        h_fc3 = tf.nn.relu(tf.matmul(h_fc1_drop, W_fc3) + b_fc3)
-
-        # dropout layer
-        h_last = tf.nn.dropout(h_fc3, keep_prob)
+        # flatten
+        h_last = tf.reshape(h_conv3, [-1, 64])
 
     # readout layer
-    W_readout = weight_variable([FCLayerSize, nClasses])
+    # W_readout = weight_variable([FCLayerSize, nClasses])
+    W_readout = weight_variable([64, nClasses])
     b_readout = bias_variable([nClasses])
     y = tf.matmul(h_last, W_readout) + b_readout
 
@@ -277,7 +232,7 @@ def main(_):
     sess.run(tf.global_variables_initializer())
 
     # run
-    print("Starting training")
+    #print("Starting training")
     train_accuracies = []
     test_accuracies = []
     batchCount = 0
@@ -301,28 +256,20 @@ def main(_):
         if batchCount % printoutPeriod == 0: # print accuracy
            train_accuracy = accuracy.eval(feed_dict={x:x_batch, y_truth:y_batch, input_keep_prob:1.0, keep_prob:1.0})
            test_accuracy = accuracy.eval(feed_dict={x:x_test, y_truth:y_test, input_keep_prob:1.0, keep_prob:1.0})
-           print("step %d, training accuracy %g, test accuracy %g"%(batchCount, train_accuracy, test_accuracy))
+           #print("step %d, training accuracy %g, test accuracy %g"%(batchCount, train_accuracy, test_accuracy))
            train_accuracies.append(train_accuracy)
            test_accuracies.append(test_accuracy)
 
         batchCount += 1
         train_step.run(feed_dict={x:x_batch, y_truth:y_batch, input_keep_prob:1-inputDropoutRate, keep_prob:1-dropoutRate})
 
-    # plot accuracies
-    indices = np.arange(len(train_accuracies))
-    plt.plot(indices, train_accuracies)
-    plt.plot(indices, test_accuracies)
-    plt.legend(['train', 'test'])
-    plt.title("Training and Test Accuracy vs. Training Steps")
-    plt.xlabel("Training step")
-    plt.ylabel("Accuracy")
-    plt.savefig(directory + "Accuracy.pdf", bbox_inches="tight")
+    print args
+    print 1-np.mean(test_accuracies[-10:])
+    return 1-np.mean(test_accuracies[-10:])
 
-    # save accuracies
-    dataFile = h5py.File(directory + "AccuracyData.h5", "w")
-    dataFile.create_dataset('trainingAccuracy', data=train_accuracies)
-    dataFile.create_dataset('testAccuracy', data=test_accuracies)
-    dataFile.close()
+def helperFunc(x):
+    tf.app.run(main=main, argv=x)
 
 if __name__ == '__main__':
-    tf.app.run(main=main)
+    res = skopt.gp_minimize(main, [(50, 200), (20, 200), (0.001, 0.5), (0.001, 0.1), (0, 0.7)])
+    skopt.dump(res, "OptFile", store_objective=False, n_calls=10) # only do 10 passes, then warm-call with the last result to keep minimizing
