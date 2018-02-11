@@ -1,0 +1,21 @@
+{
+  "tncnNetwork": {
+    "name": "eednMNIST",
+    "trainIters": 200000,    
+    "saveDirectory": "~/Documents/results/MNIST_test/network",
+    "testIters": 79,
+    "trueNorthTestPeriod": 1000,
+    "pauseOnCreation" : [false],
+    "runs": [
+      {"allLayerChanges": {"layer_params": {"learnRate": 20}}},
+
+      {"trainingChanges": {"trainingParams": {"trainIters": 50000}},
+       "allLayerChanges": {"layer_params": {"learnRate": 2}}},
+
+      {"trainingChanges": {"trainingParams": {"trainIters": 50000}},
+       "allLayerChanges": {"layer_params": {"learnRate": 0.2}}}
+
+
+    ]
+  }
+}
