@@ -1,0 +1,2 @@
+Makes LMDB file with only 10 best rows.
+Uses files where test samples have been isolated before data augmentation.
