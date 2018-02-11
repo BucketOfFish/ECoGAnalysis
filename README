@@ -1,5 +1,13 @@
-ECoGNeuralNet/ is stuff for ECoG training, data generation, and plotting in Python.
+DataAnalysis/ contains scripts and output for plotting in Python.
 
-ECoGEednTraining/ is all the stuff for training a spiking neural net in Eedn. It contains training files, as well as a folder mnist/ containing a spiking net training tutorial for the MNIST dataset, done in MATLAB. Read the TrueNorth documentation to see how to run it. It also contains scripts for converting from H5 to LMDB data. Output/ holds the output for spiking net training.
+DataAugmentation/ contains scripts for data generation, but output data is stored in ../Data/ECoG/.
 
-TrueNorth_DevKit_2016b/ is all the True North installation material and manuals.
+PythonTraining/ is stuff for ECoG training in Keras.
+
+ConvertH5ToLMDB/ converts stuff to a Matlab-useable format. Data is stored in ../Data/ECoG/.
+
+EednTraining/ is all the stuff for training a spiking neural net in Eedn. It also contains an MNIST training example, which the ECoG script is based on.
+
+TrueNorth_DevKit_2017b_Rev2/ is all the True North installation material and manuals.
+
+Papers/ contains relevant research papers.
