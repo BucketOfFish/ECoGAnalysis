@@ -8,7 +8,7 @@ import sys, os
 # OPTIONS #
 ###########
 
-from Settings.settings_002 import *
+from Settings.settings_003 import *
 
 ########################
 # AUGMENTATION METHODS #
@@ -80,6 +80,8 @@ print("Reading in original samples")
 data = h5.File(original_filename)
 x = data['Xhigh gamma'][:]
 y = data['y'][:]
+if (use_best_channels):
+    x = x[:,best_channels]
 
 x_augmented = []
 y_augmented = []

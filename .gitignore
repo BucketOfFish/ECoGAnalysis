@@ -3,3 +3,5 @@ DataAugmentation/Notebooks/.ipynb_checkpoints/
 PythonTraining/Outputs2/
 EednTraining/Output/
 EednTraining/mnist/
+*/*.pyc
+*/*/*.pyc
