@@ -1,37 +1,54 @@
 % Matlab code
 
-path = '/home/matt/Projects/Data/ECoG/ExpandedIsolatedGaussian/';
-h5Name = path + 'Expanded_ECoG_285Isolated_GaussianNoise.h5';
-LMDBTest = path + 'ECoG_test';
-LMDBTrain = path + 'ECoG_train';
-nTest = 2000;
-nTrain = 572;
+input_filename = '/home/matt/Projects/Data/ECoG/005.h5';
+samples_per_class = 5000;
+n_classes = 57;
+n_samples = samples_per_class * n_classes;
+n_channels = 10;
+n_timesteps = 129;
 
-X = h5read(h5Name, '/Xhigh gamma');
-y = h5read(h5Name, '/y');
-X = permute(X, [1, 2, 4, 3]); % add dimension
-y = y'; % transpose
+% Test and train are already split
+X_test = h5read(input_filename, '/Xhigh gamma');
+y_test = h5read(input_filename, '/y');
+X_train = h5read(input_filename, '/Xhigh gamma isolated');
+y_train = h5read(input_filename, '/y isolated');
+X_test = permute(X_test, [1, 2, 4, 3]); % add dimension
+X_train = permute(X_train, [1, 2, 4, 3]); % add dimension
+y_test = y_test'; % transpose
+y_train = y_train'; % transpose
 
-% Randomly shuffle data order.
-nSamples = size(X, 4);
-perm = randperm(nSamples);
-X = X(:,:,:,perm);
-y = y(perm);
+% Cast data types
+X_test = single(X_test); % cast from uint8 to float
+y_test = int32(y_test);
+X_train = single(X_train);
+y_train = int32(y_train);
 
-X = single(X); % cast from uint8 to float
-y = int32(y);
+% Make 1D
+X_test = reshape(X_test, 1, n_timesteps*n_channels, 1, size(X_test, 4));
+X_train = reshape(X_train, 1, n_timesteps*n_channels, 1, size(X_train, 4));
 
-% Keep only these ECoG channels
-goodChannels = [24, 25, 34, 43, 39, 26, 37, 38, 28, 35]
+% Randomly shuffle data order
+nSamples_test = size(X_test, 4);
+perm_test = randperm(nSamples_test);
+X_test = X_test(:,:,:,perm_test);
+y_test = y_test(perm_test)+1; % Matlab starts counting at 1
+nSamples_train = size(X_train, 4);
+perm_train = randperm(nSamples_train);
+X_train = X_train(:,:,:,perm_train);
+y_train = y_train(perm_train)+1; % Matlab is stupid
 
+% Save files
+file_prefix = input_filename(1:size(input_filename,2)-3)
+LMDBTest = strcat(file_prefix, '_LMDB_test')
+LMDBTrain = strcat(file_prefix, '_LMDB_train')
 if ~exist(LMDBTest, 'dir')
     mkdir(LMDBTest);
 end
 clear write_lmdb
-write_lmdb(LMDBTest, X(:,goodChannels,:,[1:nTest]), y(:,[1:nTest]), 'single');
+write_lmdb(LMDBTest, X_test, y_test, 'single');
 
 if ~exist(LMDBTrain, 'dir')
     mkdir(LMDBTrain);
 end
 clear write_lmdb
-write_lmdb(LMDBTrain, X(:,:,:,[nTest+1:nTest+nTrain]), y(:,[nTest+1:nTest+nTrain]), 'single');
+write_lmdb(LMDBTrain, X_train, y_train, 'single');

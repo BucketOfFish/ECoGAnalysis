@@ -8,7 +8,7 @@ import pandas as pd
 # SETTINGS #
 ############
 
-from Settings.settings_002 import *
+from Settings.settings_003 import *
 
 #############
 # PREP DATA #
