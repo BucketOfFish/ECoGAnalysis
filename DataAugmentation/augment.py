@@ -8,7 +8,7 @@ import sys, os
 # OPTIONS #
 ###########
 
-from Settings.settings_003 import *
+from Settings.settings_004 import *
 
 ########################
 # AUGMENTATION METHODS #
@@ -81,7 +81,9 @@ data = h5.File(original_filename)
 x = data['Xhigh gamma'][:]
 y = data['y'][:]
 if (use_best_channels):
-    x = x[:,best_channels]
+    x = x[:,best_channels,:]
+if (downsample_factor > 1):
+    x = x[:,:,::downsample_factor]
 
 x_augmented = []
 y_augmented = []
