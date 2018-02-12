@@ -8,7 +8,7 @@ import sys, os
 # OPTIONS #
 ###########
 
-from Settings.settings_005 import *
+from Settings.settings_007 import *
 
 ########################
 # AUGMENTATION METHODS #
@@ -82,8 +82,12 @@ x = data['Xhigh gamma'][:]
 y = data['y'][:]
 if (use_best_channels):
     x = x[:,best_channels,:]
+if (trim):
+    x = x[:,:,1:-1]
 if (downsample_factor > 1):
     x = x[:,:,::downsample_factor]
+if (flatten_1D):
+    x = x.reshape(x.shape[0], 1, -1)
 
 x_augmented = []
 y_augmented = []
@@ -97,29 +101,31 @@ for i in range(57):
         print('.', end='')
         sys.stdout.flush()
     indices = np.where(y==i)[0]
-    x_isolated += list(x[indices[:n_isolated_samples]])
+    x_class = x[indices]
+    x_class = shuffle(x_class)
+    x_isolated += list(x_class[:n_isolated_samples])
     y_isolated += [i]*n_isolated_samples
-    new_x = generateMoreSamples(x[indices[n_isolated_samples:]])
+    new_x = generateMoreSamples(x_class[n_isolated_samples:])
     x_augmented += new_x
     y_augmented += [i]*len(new_x)
-print("\nFinished generating new samples.")
+print("\nFinished generating new samples")
 x = np.array(x_augmented)
 y = np.array(y_augmented)
 x_isolated = np.array(x_isolated)
 y_isolated = np.array(y_isolated)
-print("Finished converting arrays.")
+print("Finished converting arrays")
 
 # shuffle samples
 # To prevent a memory error, shuffle front and back halves separately
 print("Shuffling and saving samples")
 a = x[:15000]
 b = y[:15000]
-a, b = shuffle(a, b, random_state=0)
+a, b = shuffle(a, b)
 x[:15000] = a
 y[:15000] = b
 a = x[15000:]
 b = y[15000:]
-a, b = shuffle(a, b, random_state=0)
+a, b = shuffle(a, b)
 x[15000:] = a
 y[15000:] = b
 

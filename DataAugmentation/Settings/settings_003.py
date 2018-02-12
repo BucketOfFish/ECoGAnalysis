@@ -12,5 +12,6 @@ amplitude_scaling = True
 min_amplitude_scale = 0.5
 max_amplitude_scale = 2
 use_best_channels = True
+trim = False
 best_channels = [34, 27, 37, 36, 25, 38, 42, 33, 24, 23] # (ordered worst to best, but doesn't matter)
 downsample_factor = 1

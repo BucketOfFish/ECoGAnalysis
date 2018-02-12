@@ -38,9 +38,9 @@ X_train = X_train(:,:,:,perm_train);
 y_train = y_train(perm_train)+1; % Matlab is stupid
 
 % Save files
-file_prefix = input_filename(1:size(input_filename,2)-3)
-LMDBTest = strcat(file_prefix, '_LMDB_test')
-LMDBTrain = strcat(file_prefix, '_LMDB_train')
+file_prefix = input_filename(1:size(input_filename,2)-3);
+LMDBTest = strcat(file_prefix, '/LMDB_test');
+LMDBTrain = strcat(file_prefix, '/LMDB_train');
 if ~exist(LMDBTest, 'dir')
     mkdir(LMDBTest);
 end
