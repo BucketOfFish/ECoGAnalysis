@@ -1,17 +1,17 @@
 % Matlab code
 
-input_filename = '/home/matt/Projects/Data/ECoG/005.h5';
+input_filename = '/home/matt/Projects/Data/ECoG/007.h5';
 samples_per_class = 5000;
 n_classes = 57;
 n_samples = samples_per_class * n_classes;
 n_channels = 10;
-n_timesteps = 129;
+n_timesteps = 128;
 
 % Test and train are already split
-X_test = h5read(input_filename, '/Xhigh gamma');
-y_test = h5read(input_filename, '/y');
-X_train = h5read(input_filename, '/Xhigh gamma isolated');
-y_train = h5read(input_filename, '/y isolated');
+X_test = h5read(input_filename, '/Xhigh gamma isolated');
+y_test = h5read(input_filename, '/y isolated');
+X_train = h5read(input_filename, '/Xhigh gamma');
+y_train = h5read(input_filename, '/y');
 X_test = permute(X_test, [1, 2, 4, 3]); % add dimension
 X_train = permute(X_train, [1, 2, 4, 3]); % add dimension
 y_test = y_test'; % transpose
