@@ -20,16 +20,16 @@ epochs = 10 # when to stop training
 input_filename = "../../Data/ECoG/005.h5"
 shuffle = False
 save_directory = "Outputs/001/"
+overwrite = False
 
-############
-# TRAINING #
-############
+#########
+# MODEL #
+#########
 
-def Keras_train(args):
+def model():
 
-    # Model
     model = Sequential()
-    model.add(Conv2D(32, kernel_size=(1,6), strides=(1,6), activation='relu', input_shape=(1, n_channels*n_timesteps, 1)))
+    model.add(Conv2D(32, kernel_size=(1,6), strides=(1,6), activation='relu', input_shape=(n_channels, n_timesteps, 1)))
     # model.add(Conv2D(16, kernel_size=(1,2), strides=(1,2), activation='relu', input_shape=(1, n_channels*n_timesteps, 1)))
     # model.add(Conv2D(32, kernel_size=(1,3), strides=(1,3), activation='relu'))
     model.add(Dropout(dropout_rate))
@@ -41,8 +41,8 @@ def Keras_train(args):
     model.add(Dropout(dropout_rate))
     model.add(Conv2D(12, kernel_size=(1,1), strides=(1,1), activation='relu'))
     model.add(Dropout(dropout_rate))
-    model.add(Conv2D(64, kernel_size=(1,10), strides=(1,10), activation='relu'))
-    model.add(Dropout(dropout_rate))
+    # model.add(Conv2D(64, kernel_size=(1,10), strides=(1,10), activation='relu'))
+    # model.add(Dropout(dropout_rate))
     model.add(Flatten())
     model.add(Dense(n_classes, activation='softmax'))
 
@@ -51,14 +51,4 @@ def Keras_train(args):
                   metrics=['accuracy'])
 
     model.summary()
-
-    # Train
-    model.fit(x_train, y_train,
-              batch_size=batch_size,
-              epochs=epochs,
-              verbose=1,
-              validation_data=(x_test, y_test))
-    score = model.evaluate(x_test, y_test, verbose=0)
-    print('Test loss:', score[0])
-    print('Test accuracy:', score[1])
-    model.save(directory + "Model.h5")
+    return model

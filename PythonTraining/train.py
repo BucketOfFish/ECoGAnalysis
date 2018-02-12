@@ -1,13 +1,14 @@
 import h5py as h5
 import numpy as np
-import os
+import os, shutil
 import skopt
+import pandas as pd
 
 ############
 # SETTINGS #
 ############
 
-from Settings.settings_001 import *
+from Settings.settings_002 import *
 
 #############
 # PREP DATA #
@@ -35,19 +36,32 @@ if (shuffle):
     np.random.shuffle(z)
     x_train, y_train = zip(*z)
 
-# # don't know why I had to do this
-# x_train = np.array(x_train)
-# y_train = np.array(y_train)
+#########
+# TRAIN #
+#########
 
-#######
-# RUN #
-#######
+# check if save directory already exists
+if not os.path.exists(save_directory):
+    os.makedirs(save_directory)
+else:
+    if (overwrite):
+        shutil.rmtree(save_directory)
+        os.makedirs(save_directory)
+    else:
+        print "Output folder", save_directory, "already exists - exiting"
+        exit()
 
-# save this code
-if not os.path.exists(save_directory): os.makedirs(save_directory)
-else: print "Output folder", save_directory, "already exists - exiting"; exit()
+# get model
+model = model()
 
-# optimize training
-# res = skopt.gp_minimize(Keras_train, [(50, 200), (0, 0.7)])
-Keras_train(0)
-# skopt.dump(res, "OptFile", store_objective=False, n_calls=10) # only do 10 passes, then warm-call with the last result to keep minimizing
+# train and save results
+history = model.fit(x_train, y_train,
+    batch_size=batch_size,
+    epochs=epochs,
+    verbose=1,
+    validation_data=(x_test, y_test))
+model.save(save_directory + "model.h5")
+pd.DataFrame(history.history).to_csv(save_directory + "history.csv")
+score = model.evaluate(x_test, y_test, verbose=0)
+print('Test loss:', score[0])
+print('Test accuracy:', score[1])
