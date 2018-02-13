@@ -8,7 +8,7 @@ corelet_init; % only needed by build and test, but includes a clear all, so has 
 
 % Select where to save experiment.
 homeDirectory = getenv('HOME');
-P.experiment.directory = fullfile(homeDirectory, 'Projects/ECoGAnalysis/ECoGEednTraining/Output/001/');
+P.experiment.directory = fullfile(homeDirectory, 'Projects/ECoGAnalysis/EednTraining/Output/001/');
 P = th_log(P, 'experiment');
 
 % Select which instructions to execute.
@@ -17,9 +17,11 @@ instructions = {'dataset','train'};
 
 %% Get dataset
 if ismember('dataset', instructions)
-    P.dataset.directory = fullfile(homeDirectory, 'Projects/Data/ECoG/005/');
-    P.dataset.trainLmdb = 'LMDB_train';
-    P.dataset.testLmdb = 'LMDB_test';
+    P.dataset.directory = fullfile(homeDirectory, 'Projects/Data/ECoG/007/');
+    P.dataset.trainLmdb = 'LMDB_test';
+    P.dataset.testLmdb = 'LMDB_train';
+    %P.dataset.trainLmdb = 'LMDB_train';
+    %P.dataset.testLmdb = 'LMDB_test';
     P = th_log(P, 'dataset');
     P.preprocess.directory = P.dataset.directory;
     P.preprocess.trainLmdb = P.dataset.trainLmdb;

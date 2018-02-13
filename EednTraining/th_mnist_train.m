@@ -63,35 +63,26 @@ N{1} = th_layerdata({'trainFile',trainLmdb,'testFile',testLmdb,'nClasses',57,'ba
 % Neuron Layers
 % ----------------------------------------
 
-%N{end+1} = th_layerconv_bin(N{end}, {'patchSize', [1,1], 'nGroups', 1, ...
-%						'pad', 0, 'stride', 1, ...
-%						'nFeatures', 128, ...
-%						'weightInitMethod', 'gauss100', ...
-%						'learnRate', 1, 'momentum', 0.9, ...
-%						'hysteresis', 0, ...
-%						'transduction', true});
-
-%dropoutRate = 0.0
-%%N{end+1} = th_layerconv_bin(N{end},{'nFeatures',48,'patchSize',[6,1],'nGroups',1,'pad',0,'stride',6});
-%N{end+1} = th_layerconv_bin(N{end},{'nFeatures',32,'patchSize',[18,1],'nGroups',1,'pad',12,'stride',6});
-%N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
-%%N{end+1} = th_layerconv_bin(N{end},{'nFeatures',4,'patchSize',[1,1],'nGroups',1,'pad',0,'stride',1});
-%N{end+1} = th_layerconv_bin(N{end},{'nFeatures',32,'patchSize',[3,1],'nGroups',8,'pad',0,'stride',3});
-%N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
-%%N{end+1} = th_layerconv_bin(N{end},{'nFeatures',2,'patchSize',[1,1],'nGroups',1,'pad',0,'stride',1});
-%N{end+1} = th_layerconv_bin(N{end},{'nFeatures',48,'patchSize',[7,1],'nGroups',16,'pad',0,'stride',7});
-%N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
-%%N{end+1} = th_layerconv_bin(N{end},{'nFeatures',12,'patchSize',[1,1],'nGroups',1,'pad',0,'stride',1});
-%%N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
-%N{end+1} = th_layerconv_bin(N{end},{'nFeatures',64,'patchSize',[10,1],'nGroups',4,'pad',0,'stride',1});
-
-dropoutRate = 0.3
-N{end+1} = th_layerconv_bin(N{end},{'nFeatures',32,'patchSize',[3,1],'nGroups',1,'pad',0,'stride',3,'transduction',true,'weightInitMethod','gauss3200','hysteresis',0}); % Transduction layer
-N{end+1} = th_layerconv_bin(N{end},{'nFeatures',2,'patchSize',[1,1],'nGroups',1,'pad',0,'stride',1});
+dropoutRate = 0.1; learningRate = 0.5;
+N{end+1} = th_layerconv_bin(N{end},{'nFeatures',16,'patchSize',[1,2],'nGroups',1,'pad',0,'stride',2,'transduction',true,'weightInitMethod','gauss3200','hysteresis',0}); % Transduction layer
 N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
-N{end+1} = th_layerconv_bin(N{end},{'nFeatures',2,'patchSize',[42,1],'nGroups',1,'pad',0,'stride',42});
+N{end+1} = th_layerconv_bin(N{end},{'nFeatures',32,'patchSize',[1,3],'nGroups',1,'pad',0,'stride',3});
 N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
-N{end+1} = th_layerconv_bin(N{end},{'nFeatures',64,'patchSize',[10,1],'nGroups',1,'pad',0,'stride',1});
+N{end+1} = th_layerconv_bin(N{end},{'nFeatures',16,'patchSize',[1,1],'nGroups',1,'pad',0,'stride',1});
+N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
+N{end+1} = th_layerconv_bin(N{end},{'nFeatures',32,'patchSize',[1,3],'nGroups',1,'pad',0,'stride',3});
+N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
+N{end+1} = th_layerconv_bin(N{end},{'nFeatures',16,'patchSize',[1,1],'nGroups',1,'pad',0,'stride',1});
+N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
+N{end+1} = th_layerconv_bin(N{end},{'nFeatures',64,'patchSize',[1,7],'nGroups',1,'pad',0,'stride',7});
+N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
+N{end+1} = th_layerconv_bin(N{end},{'nFeatures',32,'patchSize',[1,1],'nGroups',1,'pad',0,'stride',1});
+N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
+N{end+1} = th_layerconv_bin(N{end},{'nFeatures',16,'patchSize',[1,1],'nGroups',1,'pad',0,'stride',1});
+N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
+N{end+1} = th_layerconv_bin(N{end},{'nFeatures',8,'patchSize',[1,1],'nGroups',1,'pad',0,'stride',1});
+N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
+N{end+1} = th_layerconv_bin(N{end},{'nFeatures',64,'patchSize',[1,10],'nGroups',1,'pad',0,'stride',1});
 
 % ----------------------------------------
 % Predict Layer
@@ -101,8 +92,8 @@ N{end+1} = th_layerpredict(N{end},{'predictionRange',10});
 % ----------------------------------------
 % Loss Layer
 % ----------------------------------------
-%N{end+1} = th_layerloss(N{end}, {'lossFunction', 'softmax', 'topk', 1});
-N{end+1} = th_layerloss(N{end});
+N{end+1} = th_layerloss(N{end}, {'lossFunction', 'softmax', 'topk', 1});
+%N{end+1} = th_layerloss(N{end});
 
 % Default number of training iterations. These must be the numbers for a
 % complete training run. For a shorter run, set these values in the *_all.m
@@ -126,7 +117,7 @@ T = th_net_bin({'trainIters',P.train.firstTrainIter,'trueNorthTestPeriod',100000
 % Train
 % ----------------------------------------
 % Learn
-N{1}.setAll({'learnRate',0.50});
+N{1}.setAll({'learnRate', learningRate});
 %N{1}.setAll({'weightDecay',0});
 T.train(N);
 
@@ -135,21 +126,15 @@ T.train(N);
 % ----------------------------------------
 % Learning rate decay
 T.trainIters = P.train.otherTrainIter;
-N{1}.setAll({'learnRate',N{2}.learnRate .* 0.1});
+N{1}.setAll({'learnRate',N{1}.learningRate .* 0.5});
 T.train(N);
-N{1}.setAll({'learnRate',N{2}.learnRate .* 0.5});
-T.train(N);
-N{1}.setAll({'learnRate',N{2}.learnRate .* 0.5});
-T.train(N);
-N{1}.setAll({'learnRate',N{2}.learnRate .* 0.5});
-T.train(N);
-N{1}.setAll({'learnRate',N{2}.learnRate .* 0.5});
+N{1}.setAll({'learnRate',N{1}.learningRate .* 0.5});
 T.train(N);
 
 fprintf('th_mnist_train:  Done.\n');
 
 % Plot
-figure
+%figure
 plotFile = P.experiment.directory + P.train.directory + P.train.networkFile;
 plotEednLayersFile(1, plotFile)
 

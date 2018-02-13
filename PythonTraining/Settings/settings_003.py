@@ -6,20 +6,20 @@ from keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D
 # SETTINGS #
 ############
 
-samples_per_class = 5000
+samples_per_class = 2000
 n_classes = 57
 n_samples = samples_per_class * n_classes
 n_channels = 10 # ECoG channels
-n_timesteps = 129 # time steps per sample
+n_timesteps = 128 # time steps per sample
 
 batch_size = 100
 dropout_rate = 0.3
 learning_rate = 0.01
 epochs = 10 # when to stop training
 
-input_filename = "../../Data/ECoG/005.h5"
+input_filename = "../../Data/ECoG/006.h5"
 shuffle = False
-save_directory = "Outputs/001/"
+save_directory = "Outputs/003/"
 overwrite = False
 
 #########
@@ -47,7 +47,7 @@ def model():
     model.add(Dense(n_classes, activation='softmax'))
 
     model.compile(loss=keras.losses.categorical_crossentropy,
-                  optimizer=keras.optimizers.Adadelta(lr=learning_rate),
+                  optimizer=keras.optimizers.Adadelta(),
                   metrics=['accuracy'])
 
     model.summary()
