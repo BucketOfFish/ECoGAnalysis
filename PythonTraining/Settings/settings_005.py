@@ -19,7 +19,7 @@ epochs = 10 # when to stop training
 
 input_filename = "../../Data/ECoG/007.h5"
 shuffle = False
-save_directory = "Outputs/004/"
+save_directory = "Outputs/005/"
 overwrite = False
 
 #########
@@ -29,11 +29,12 @@ overwrite = False
 def model():
 
     model = Sequential()
-    model.add(Conv2D(16, kernel_size=(1,2), strides=(1,2), activation='relu', input_shape=(1, n_channels*n_timesteps, 1)))
+    # model.add(Conv2D(16, kernel_size=(1,2), strides=(1,2), activation='relu', input_shape=(1, n_channels*n_timesteps, 1)))
+    # model.add(Dropout(dropout_rate))
+    # model.add(Conv2D(32, kernel_size=(1,3), strides=(1,3), activation='relu'))
+    model.add(Conv2D(128, kernel_size=(1,6), strides=(1,6), activation='relu', input_shape=(1, n_channels*n_timesteps, 1)))
     model.add(Dropout(dropout_rate))
-    model.add(Conv2D(32, kernel_size=(1,3), strides=(1,3), activation='relu'))
-    model.add(Dropout(dropout_rate))
-    model.add(Conv2D(16, kernel_size=(1,1), strides=(1,1), activation='relu'))
+    model.add(Conv2D(32, kernel_size=(1,1), strides=(1,1), activation='relu'))
     model.add(Dropout(dropout_rate))
     model.add(Conv2D(32, kernel_size=(1,3), strides=(1,3), activation='relu'))
     model.add(Dropout(dropout_rate))
@@ -41,9 +42,9 @@ def model():
     model.add(Dropout(dropout_rate))
     model.add(Conv2D(64, kernel_size=(1,7), strides=(1,7), activation='relu'))
     model.add(Dropout(dropout_rate))
-    model.add(Conv2D(32, kernel_size=(1,1), strides=(1,1), activation='relu'))
+    model.add(Conv2D(64, kernel_size=(1,1), strides=(1,1), activation='relu'))
     model.add(Dropout(dropout_rate))
-    model.add(Conv2D(16, kernel_size=(1,1), strides=(1,1), activation='relu'))
+    model.add(Conv2D(64, kernel_size=(1,1), strides=(1,1), activation='relu'))
     model.add(Dropout(dropout_rate))
     model.add(Conv2D(8, kernel_size=(1,1), strides=(1,1), activation='relu'))
     model.add(Dropout(dropout_rate))
@@ -53,8 +54,8 @@ def model():
     model.add(Dense(n_classes, activation='softmax'))
 
     model.compile(loss=keras.losses.categorical_crossentropy,
-                  optimizer=keras.optimizers.SGD(lr=learning_rate),
-                  # optimizer=keras.optimizers.Adadelta(),
+                  # optimizer=keras.optimizers.SGD(lr=learning_rate),
+                  optimizer=keras.optimizers.Adadelta(),
                   metrics=['accuracy'])
 
     model.summary()

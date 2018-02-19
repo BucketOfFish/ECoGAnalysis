@@ -60,29 +60,50 @@ testLmdb = fullfile(P.dataset.directory, P.dataset.testLmdb);
 N{1} = th_layerdata({'trainFile',trainLmdb,'testFile',testLmdb,'nClasses',57,'batchSize',100,'shuffleTrain',true});
 
 % ----------------------------------------
-% Neuron Layers
+% Neuron Layers - 1D
 % ----------------------------------------
 
-dropoutRate = 0.1; learningRate = 0.5;
-N{end+1} = th_layerconv_bin(N{end},{'nFeatures',16,'patchSize',[1,2],'nGroups',1,'pad',0,'stride',2,'transduction',true,'weightInitMethod','gauss3200','hysteresis',0}); % Transduction layer
+%dropoutRate = 0.25; learningRate = 0.3;
+%N{end+1} = th_layerconv_bin(N{end},{'nFeatures',16,'patchSize',[1,2],'nGroups',1,'pad',0,'stride',2,'transduction',true,'weightInitMethod','gauss3200','hysteresis',0}); % Transduction layer
+%N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
+%N{end+1} = th_layerconv_bin(N{end},{'nFeatures',32,'patchSize',[1,3],'nGroups',1,'pad',0,'stride',3});
+%N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
+%N{end+1} = th_layerconv_bin(N{end},{'nFeatures',32,'patchSize',[1,1],'nGroups',1,'pad',0,'stride',1});
+%N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
+%N{end+1} = th_layerconv_bin(N{end},{'nFeatures',32,'patchSize',[1,3],'nGroups',1,'pad',0,'stride',3});
+%N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
+%N{end+1} = th_layerconv_bin(N{end},{'nFeatures',16,'patchSize',[1,1],'nGroups',1,'pad',0,'stride',1});
+%N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
+%N{end+1} = th_layerconv_bin(N{end},{'nFeatures',64,'patchSize',[1,7],'nGroups',1,'pad',0,'stride',7});
+%N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
+%N{end+1} = th_layerconv_bin(N{end},{'nFeatures',64,'patchSize',[1,1],'nGroups',1,'pad',0,'stride',1});
+%N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
+%N{end+1} = th_layerconv_bin(N{end},{'nFeatures',64,'patchSize',[1,1],'nGroups',1,'pad',0,'stride',1});
+%N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
+%N{end+1} = th_layerconv_bin(N{end},{'nFeatures',8,'patchSize',[1,1],'nGroups',1,'pad',0,'stride',1});
+%N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
+%N{end+1} = th_layerconv_bin(N{end},{'nFeatures',64,'patchSize',[1,10],'nGroups',1,'pad',0,'stride',1});
+
+% ----------------------------------------
+% Neuron Layers - 2D
+% ----------------------------------------
+
+dropoutRate = 0.5; learningRate = 0.3;
+N{end+1} = th_layerconv_bin(N{end},{'nFeatures',16,'patchSize',[1,10],'nGroups',1,'pad',0,'stride',1,'transduction',true,'weightInitMethod','gauss3200','hysteresis',0}); % Transduction layer
 N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
-N{end+1} = th_layerconv_bin(N{end},{'nFeatures',32,'patchSize',[1,3],'nGroups',1,'pad',0,'stride',3});
-N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
-N{end+1} = th_layerconv_bin(N{end},{'nFeatures',16,'patchSize',[1,1],'nGroups',1,'pad',0,'stride',1});
-N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
-N{end+1} = th_layerconv_bin(N{end},{'nFeatures',32,'patchSize',[1,3],'nGroups',1,'pad',0,'stride',3});
-N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
-N{end+1} = th_layerconv_bin(N{end},{'nFeatures',16,'patchSize',[1,1],'nGroups',1,'pad',0,'stride',1});
-N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
-N{end+1} = th_layerconv_bin(N{end},{'nFeatures',64,'patchSize',[1,7],'nGroups',1,'pad',0,'stride',7});
+N{end+1} = th_layerconv_bin(N{end},{'nFeatures',32,'patchSize',[6,1],'nGroups',1,'pad',0,'stride',3});
 N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
 N{end+1} = th_layerconv_bin(N{end},{'nFeatures',32,'patchSize',[1,1],'nGroups',1,'pad',0,'stride',1});
 N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
+N{end+1} = th_layerconv_bin(N{end},{'nFeatures',32,'patchSize',[3,1],'nGroups',1,'pad',0,'stride',3});
+N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
 N{end+1} = th_layerconv_bin(N{end},{'nFeatures',16,'patchSize',[1,1],'nGroups',1,'pad',0,'stride',1});
 N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
-N{end+1} = th_layerconv_bin(N{end},{'nFeatures',8,'patchSize',[1,1],'nGroups',1,'pad',0,'stride',1});
+N{end+1} = th_layerconv_bin(N{end},{'nFeatures',64,'patchSize',[7,1],'nGroups',1,'pad',0,'stride',7});
 N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
-N{end+1} = th_layerconv_bin(N{end},{'nFeatures',64,'patchSize',[1,10],'nGroups',1,'pad',0,'stride',1});
+N{end+1} = th_layerconv_bin(N{end},{'nFeatures',64,'patchSize',[1,1],'nGroups',1,'pad',0,'stride',1});
+N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
+N{end+1} = th_layerconv_bin(N{end},{'nFeatures',128,'patchSize',[1,1],'nGroups',1,'pad',0,'stride',1});
 
 % ----------------------------------------
 % Predict Layer

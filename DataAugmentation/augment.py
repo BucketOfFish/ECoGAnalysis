@@ -8,7 +8,7 @@ import sys, os
 # OPTIONS #
 ###########
 
-from Settings.settings_007 import *
+from Settings.settings_010 import *
 
 ########################
 # AUGMENTATION METHODS #

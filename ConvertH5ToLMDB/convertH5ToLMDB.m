@@ -1,7 +1,7 @@
 % Matlab code
 
-input_filename = '/home/matt/Projects/Data/ECoG/007.h5';
-samples_per_class = 5000;
+input_filename = '/home/matt/Projects/Data/ECoG/010.h5';
+samples_per_class = 3000;
 n_classes = 57;
 n_samples = samples_per_class * n_classes;
 n_channels = 10;
@@ -24,8 +24,8 @@ X_test = single(X_test); % cast from uint8 to float
 y_test = int32(y_test);
 
 % Make 1D
-X_train = reshape(X_train, 1, n_timesteps*n_channels, 1, size(X_train, 4));
-X_test = reshape(X_test, 1, n_timesteps*n_channels, 1, size(X_test, 4));
+%X_train = reshape(X_train, 1, n_timesteps*n_channels, 1, size(X_train, 4));
+%X_test = reshape(X_test, 1, n_timesteps*n_channels, 1, size(X_test, 4));
 
 % Randomly shuffle data order
 nSamples_train = size(X_train, 4);

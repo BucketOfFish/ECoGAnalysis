@@ -3,12 +3,22 @@ import numpy as np
 import os, shutil
 import skopt
 import pandas as pd
+import keras
+import tensorflow as tf
 
 ############
 # SETTINGS #
 ############
 
-from Settings.settings_004 import *
+from Settings.settings_008 import *
+
+#######
+# GPU #
+#######
+
+config = tf.ConfigProto(device_count = {'GPU': 1, 'CPU': 56})
+sess = tf.Session(config=config)
+keras.backend.set_session(sess)
 
 #############
 # PREP DATA #
@@ -35,6 +45,8 @@ if (shuffle):
     z = zip(x_train, y_train)
     np.random.shuffle(z)
     x_train, y_train = zip(*z)
+    # x_train = np.array(x_train)
+    # y_train = np.array(y_train)
 
 #########
 # TRAIN #
