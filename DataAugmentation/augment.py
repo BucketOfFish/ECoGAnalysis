@@ -3,12 +3,13 @@ import h5py as h5
 import numpy as np
 from sklearn.utils import shuffle
 import sys, os
+import matplotlib.pyplot as plt
 
 ###########
 # OPTIONS #
 ###########
 
-from Settings.settings_010 import *
+from Settings.settings_001 import *
 
 ########################
 # AUGMENTATION METHODS #
@@ -26,7 +27,6 @@ def interpolation(original_samples):
 def gaussian_noise(sample):
     noise = np.random.randn(sample.shape[0], sample.shape[1]) * gaussian_noise_sigma
     sample = sample + noise
-    sample = sample.clip(min=0)
     return sample
 
 def time_shift(sample):
@@ -34,9 +34,9 @@ def time_shift(sample):
     positive_direction = bool(np.random.randint(2))
     zeros = np.zeros((sample.shape[0], time_steps))
     if (positive_direction):
-        sample = np.concatenate((zeros, sample[:,:-time_steps]), axis=1)
+        sample = np.concatenate((sample[:,-time_steps:], sample[:,:-time_steps]), axis=1)
     else:
-        sample = np.concatenate((sample[:,time_steps:], zeros), axis=1)
+        sample = np.concatenate((sample[:,time_steps:], sample[:,:time_steps]), axis=1)
     return sample
 
 def amplitude_scale(sample):
@@ -53,14 +53,18 @@ def generateMoreSamples(original_samples):
             new_sample = interpolation(original_samples)
         else:
             new_sample = original_samples[np.random.randint(len(original_samples))]
-        if (gaussian_noise):
+        if (do_gaussian_noise):
             new_sample = gaussian_noise(new_sample)
-        if (time_shift):
+        if (do_time_shift):
             new_sample = time_shift(new_sample)
-        if (amplitude_scale):
+        if (do_amplitude_scale):
             new_sample = amplitude_scale(new_sample)
+        # make sure the sample is positive
+        new_sample = new_sample + 5
+        new_sample = new_sample.clip(min=0)
         new_samples.append(new_sample)
         n_samples += 1
+        assert 1==2
     return list(original_samples) + new_samples
 
 ########################
