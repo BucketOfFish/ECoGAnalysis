@@ -1,10 +1,10 @@
 original_filename = "../../Data/ECoG/Original/EC2_blocks_1_8_9_15_76_89_105_CV_HG_align_window_-0.5_to_0.79_file_nobaseline.h5"
-new_filename = "../../Data/ECoG/011.h5"
+new_filename = "../../Data/ECoG/001.h5"
 overwrite = True # whether it's ok to overwrite an existing output file
 n_isolated_samples = 5 # samples to keep separate and not use in augmentation (will later be used as test samples)
 total_samples_per_class = 3000 # total number of samples we want to end up with for each CV pair
 do_interpolation = True
-do_gaussian_noise = False
+do_gaussian_noise = True
 gaussian_noise_sigma = 0.5
 do_time_shift = True
 max_steps_timeshift = 10

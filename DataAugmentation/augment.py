@@ -64,7 +64,6 @@ def generateMoreSamples(original_samples):
         new_sample = new_sample.clip(min=0)
         new_samples.append(new_sample)
         n_samples += 1
-        assert 1==2
     return list(original_samples) + new_samples
 
 ########################
