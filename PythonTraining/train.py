@@ -10,7 +10,7 @@ import tensorflow as tf
 # SETTINGS #
 ############
 
-from Settings.settings_008 import *
+from Settings.settings_001 import *
 
 #######
 # GPU #

@@ -1,6 +1,6 @@
 % Matlab code
 
-input_filename = '/home/matt/Projects/Data/ECoG/010.h5';
+input_filename = '/home/matt/Projects/Data/ECoG/002.h5';
 samples_per_class = 3000;
 n_classes = 57;
 n_samples = samples_per_class * n_classes;

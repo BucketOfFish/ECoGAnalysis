@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 # OPTIONS #
 ###########
 
-from Settings.settings_001 import *
+from Settings.settings_002 import *
 
 ########################
 # AUGMENTATION METHODS #
@@ -48,20 +48,24 @@ def generateMoreSamples(original_samples):
     n_samples = len(original_samples)
     new_samples = []
     while n_samples < total_samples_per_class:
-        if (interpolation):
+        if (do_interpolation):
             # only use original examples to ensure we don't get closer and closer to the mean
             new_sample = interpolation(original_samples)
         else:
             new_sample = original_samples[np.random.randint(len(original_samples))]
+        # plt.imshow(new_sample); plt.colorbar(); plt.show()
         if (do_gaussian_noise):
             new_sample = gaussian_noise(new_sample)
+        # plt.imshow(new_sample); plt.colorbar(); plt.show()
         if (do_time_shift):
             new_sample = time_shift(new_sample)
+        # plt.imshow(new_sample); plt.colorbar(); plt.show()
+        # make sure the sample is positive
+        new_sample = (offset_multiplicative * (new_sample + offset_scalar)).clip(min=0)
+        # plt.imshow(new_sample); plt.colorbar(); plt.show()
         if (do_amplitude_scale):
             new_sample = amplitude_scale(new_sample)
-        # make sure the sample is positive
-        new_sample = new_sample + 5
-        new_sample = new_sample.clip(min=0)
+        # plt.imshow(new_sample); plt.colorbar(); plt.show()
         new_samples.append(new_sample)
         n_samples += 1
     return list(original_samples) + new_samples

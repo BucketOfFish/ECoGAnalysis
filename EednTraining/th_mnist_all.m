@@ -17,7 +17,7 @@ instructions = {'dataset','train'};
 
 %% Get dataset
 if ismember('dataset', instructions)
-    P.dataset.directory = fullfile(homeDirectory, 'Projects/Data/ECoG/010/');
+    P.dataset.directory = fullfile(homeDirectory, 'Projects/Data/ECoG/001/');
     P.dataset.trainLmdb = 'LMDB_test';
     P.dataset.testLmdb = 'LMDB_train';
     %P.dataset.trainLmdb = 'LMDB_train';

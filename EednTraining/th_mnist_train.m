@@ -79,10 +79,10 @@ N{1} = th_layerdata({'trainFile',trainLmdb,'testFile',testLmdb,'nClasses',57,'ba
 %N{end+1} = th_layerconv_bin(N{end},{'nFeatures',64,'patchSize',[1,1],'nGroups',1,'pad',0,'stride',1});
 %N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
 %N{end+1} = th_layerconv_bin(N{end},{'nFeatures',64,'patchSize',[1,1],'nGroups',1,'pad',0,'stride',1});
-%N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
-%N{end+1} = th_layerconv_bin(N{end},{'nFeatures',8,'patchSize',[1,1],'nGroups',1,'pad',0,'stride',1});
-%N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
-%N{end+1} = th_layerconv_bin(N{end},{'nFeatures',64,'patchSize',[1,10],'nGroups',1,'pad',0,'stride',1});
+%%N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
+%%N{end+1} = th_layerconv_bin(N{end},{'nFeatures',8,'patchSize',[1,1],'nGroups',1,'pad',0,'stride',1});
+%%N{end+1} = th_layerdrop(N{end},{'rate',dropoutRate}); 
+%%N{end+1} = th_layerconv_bin(N{end},{'nFeatures',64,'patchSize',[1,10],'nGroups',1,'pad',0,'stride',1});
 
 % ----------------------------------------
 % Neuron Layers - 2D
