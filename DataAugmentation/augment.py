@@ -11,6 +11,39 @@ import matplotlib.pyplot as plt
 
 from Settings.settings_002 import *
 
+#############
+# GROUPINGS #
+#############
+
+def grouping(label):
+
+    """Given a CV label in (0-56), returns the consonant (0-18),
+    vowel (0-2), place (0-2), and manner (0-2) labels.
+    Note that not all CVs have place and manner labels (will return None).
+    """
+    consonant = label // 3
+    vowel = label % 3
+
+    if consonant in [0, 2, 10]:
+        place = 0
+    elif consonant in [1, 11, 6]:
+        place = 1
+    elif consonant in [3, 17]:
+        place = 2
+    else:
+        place = None
+
+    if consonant in [0, 1, 3]:
+        manner = 0
+    elif consonant in [2, 11]:
+        manner = 1
+    elif consonant in [10, 6, 17]:
+        manner = 2
+    else:
+        manner = None
+
+    return consonant, vowel, place, manner
+
 ########################
 # AUGMENTATION METHODS #
 ########################
@@ -70,9 +103,9 @@ def generateMoreSamples(original_samples):
         n_samples += 1
     return list(original_samples) + new_samples
 
-########################
-# PERFORM AUGMENTATION #
-########################
+#####################################
+# PERFORM AUGMENTATION AND GROUPING #
+#####################################
 
 # make sure save file doesn't already exist
 if (os.path.exists(new_filename) and not overwrite):
@@ -139,7 +172,27 @@ y[15000:] = b
 # save samples
 new_data = h5.File(new_filename, "w")
 new_data.create_dataset('Xhigh gamma', data=x)
-new_data.create_dataset('y', data=y)
 new_data.create_dataset('Xhigh gamma isolated', data=x_isolated)
+new_data.create_dataset('y', data=y)
 new_data.create_dataset('y isolated', data=y_isolated)
+
+# perform grouping
+groupings = [grouping(i) for i in y]
+y_consonant = [i[0] for i in groupings]
+y_vowel = [i[1] for i in groupings]
+y_place = [i[2] for i in groupings]
+y_manner = [i[3] for i in groupings]
+groupings_isolated = [grouping(i) for i in y_isolated]
+y_consonant_isolated = [i[0] for i in groupings_isolated]
+y_vowel_isolated = [i[1] for i in groupings_isolated]
+y_place_isolated = [i[2] for i in groupings_isolated]
+y_manner_isolated = [i[3] for i in groupings_isolated]
+new_data.create_dataset('y_consonant', data=y_consonant)
+new_data.create_dataset('y_consonant isolated', data=y_consonant_isolated)
+new_data.create_dataset('y_vowel', data=y_vowel)
+new_data.create_dataset('y_vowel isolated', data=y_vowel_isolated)
+new_data.create_dataset('y_place', data=y_place)
+new_data.create_dataset('y_place isolated', data=y_place_isolated)
+new_data.create_dataset('y_manner', data=y_manner)
+new_data.create_dataset('y_manner isolated', data=y_manner_isolated)
 new_data.close()
