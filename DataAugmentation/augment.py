@@ -125,7 +125,10 @@ if (use_best_channels):
 if (trim):
     x = x[:,:,1:-1]
 if (downsample_factor > 1):
-    x = x[:,:,::downsample_factor]
+    if (downsample_factor == 2):
+        x = (x[:,:,::downsample_factor] + x[:,:,1::downsample_factor]) / 2
+    else:
+        x = x[:,:,::downsample_factor]
 if (flatten_1D):
     x = x.reshape(x.shape[0], 1, -1)
 
@@ -191,8 +194,8 @@ new_data.create_dataset('y_consonant', data=y_consonant)
 new_data.create_dataset('y_consonant isolated', data=y_consonant_isolated)
 new_data.create_dataset('y_vowel', data=y_vowel)
 new_data.create_dataset('y_vowel isolated', data=y_vowel_isolated)
-new_data.create_dataset('y_place', data=y_place)
-new_data.create_dataset('y_place isolated', data=y_place_isolated)
-new_data.create_dataset('y_manner', data=y_manner)
-new_data.create_dataset('y_manner isolated', data=y_manner_isolated)
+# new_data.create_dataset('y_place', data=y_place)
+# new_data.create_dataset('y_place isolated', data=y_place_isolated)
+# new_data.create_dataset('y_manner', data=y_manner)
+# new_data.create_dataset('y_manner isolated', data=y_manner_isolated)
 new_data.close()
