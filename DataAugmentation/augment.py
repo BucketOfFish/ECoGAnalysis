@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 # OPTIONS #
 ###########
 
-from Settings.settings_002 import *
+from Settings.settings_007 import *
 
 #############
 # GROUPINGS #
@@ -31,7 +31,8 @@ def grouping(label):
     elif consonant in [3, 17]:
         place = 2
     else:
-        place = None
+        # place = None
+        place = 3
 
     if consonant in [0, 1, 3]:
         manner = 0
@@ -40,7 +41,8 @@ def grouping(label):
     elif consonant in [10, 6, 17]:
         manner = 2
     else:
-        manner = None
+        # manner = None
+        manner = 3
 
     return consonant, vowel, place, manner
 
@@ -194,8 +196,8 @@ new_data.create_dataset('y_consonant', data=y_consonant)
 new_data.create_dataset('y_consonant isolated', data=y_consonant_isolated)
 new_data.create_dataset('y_vowel', data=y_vowel)
 new_data.create_dataset('y_vowel isolated', data=y_vowel_isolated)
-# new_data.create_dataset('y_place', data=y_place)
-# new_data.create_dataset('y_place isolated', data=y_place_isolated)
-# new_data.create_dataset('y_manner', data=y_manner)
-# new_data.create_dataset('y_manner isolated', data=y_manner_isolated)
+new_data.create_dataset('y_place', data=y_place)
+new_data.create_dataset('y_place isolated', data=y_place_isolated)
+new_data.create_dataset('y_manner', data=y_manner)
+new_data.create_dataset('y_manner isolated', data=y_manner_isolated)
 new_data.close()
