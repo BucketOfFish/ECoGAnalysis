@@ -1,7 +1,6 @@
 import h5py as h5
 import numpy as np
 import os, shutil
-import skopt
 import pandas as pd
 import keras
 import tensorflow as tf
@@ -10,7 +9,7 @@ import tensorflow as tf
 # SETTINGS #
 ############
 
-from Settings.settings_003 import *
+from Settings.settings_003_optimize import *
 
 #######
 # GPU #
@@ -64,17 +63,44 @@ else:
         print "Output folder", save_directory, "already exists - exiting"
         exit()
 
-# get model
-model = model()
+def train(layers):
 
-# train and save results
-history = model.fit(x_train, y_train,
-    batch_size=batch_size,
-    epochs=epochs,
-    verbose=1,
-    validation_data=(x_test, y_test))
-model.save(save_directory + "model.h5")
-pd.DataFrame(history.history).to_csv(save_directory + "history.csv")
-score = model.evaluate(x_test, y_test, verbose=0)
-print('Test loss:', score[0])
-print('Test accuracy:', score[1])
+    # get model
+    my_model = model(layers)
+
+    # train and save results
+    history = my_model.fit(x_train, y_train,
+        batch_size=batch_size,
+        epochs=epochs,
+        verbose=1,
+        validation_data=(x_test, y_test))
+    my_model.save(save_directory + "model.h5")
+    pd.DataFrame(history.history).to_csv(save_directory + "history.csv")
+    score = my_model.evaluate(x_test, y_test, verbose=0)
+    print('Test loss:', score[0])
+    print('Test accuracy:', score[1])
+    return score
+
+############
+# OPTIMIZE #
+############
+
+layers_list = [
+    [128, 1],
+    [8, 16, 1],
+    [2, 4, 16],
+    [2, 4, 4, 4], 
+    [4, 2, 4, 1, 4], 
+    [2, 2, 2, 2, 2, 2, 2]]
+scores = []
+
+for layers in layers_list:
+    scores.append(train(layers))
+
+print scores
+losses = [i[0] for i in scores]
+accuracies = [i[1] for i in scores]
+print "Highest test accuracy:", max(accuracies)
+print "Best model:", layers_list[accuracies.index(max(accuracies))]
+
+plot_convergence(result)
